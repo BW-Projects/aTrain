@@ -1,3 +1,4 @@
+import os
 from importlib.resources import files
 from importlib.util import find_spec
 from pathlib import Path
@@ -17,3 +18,5 @@ METADATA_FILENAME = "metadata.txt"
 LOG_FILENAME = "log.txt"
 TIMESTAMP_FORMAT = "%Y-%m-%d %H-%M-%S"
 SAMPLING_RATE = 16000
+DEFAULT_CPU_THREADS = max(1, count - 1) if (count := os.cpu_count()) else 4
+MAX_CPU_THREADS = os.cpu_count() or DEFAULT_CPU_THREADS
