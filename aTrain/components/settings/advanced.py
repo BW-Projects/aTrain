@@ -77,7 +77,7 @@ def input_cpu_threads():
             number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
             number.bind_value(state, "cpu_threads")
 
-            reset_btn = ui.button(icon="refresh", color="gray")
+            reset_btn = ui.button(icon="refresh", color="gray-300")
             reset_btn.props("flat dense round size=sm").tooltip("Reset to default")
             reset_btn.on_click(lambda: setattr(number, "value", DEFAULT_CPU_THREADS))
 
@@ -86,9 +86,21 @@ def input_temperature():
     with ui.column().classes("w-full gap-2"):
         ui.label("Temperature").classes("font-bold text-dark")
         ui.separator()
-        number = ui.number(min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto")
-        number.props("filled bg-color=gray-100 color=dark clearable").classes("w-full")
-    number.bind_value(app.storage.general, "temperature_override")  # <- New state name
+
+        with ui.row().classes("w-full gap-2 items-center"):
+            number = ui.number(
+                min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto"
+            )
+            number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
+            number.bind_value(
+                app.storage.general, "temperature_override"
+            )  # <- New state name
+
+            reset_btn = ui.button(icon="refresh", color="gray-300")
+            reset_btn.props("flat dense round size=sm").tooltip(
+                "Reset to default (auto)"
+            )
+            reset_btn.on_click(lambda: setattr(number, "value", None))
 
     # Fix wrong default setting from version 1.4.0, TODO: Revert state name to "temperature" in upcoming releases
     app.storage.general["temperature"] = None
