@@ -72,12 +72,7 @@ def input_cpu_threads():
             )
             number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
             number.bind_value(state, "cpu_threads")
-<<<<<<< HEAD
-
             reset_btn = ui.button(icon="refresh", color="gray-300")
-=======
-            reset_btn = ui.button(icon="refresh", color="gray")
->>>>>>> 53bc7bf25bc5f6e93dc2a20fc8d7d1ab5037704e
             reset_btn.props("flat dense round size=sm").tooltip("Reset to default")
             reset_btn.on_click(lambda: number.set_value(DEFAULT_CPU_THREADS))
 
