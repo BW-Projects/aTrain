@@ -36,6 +36,7 @@ class Settings:
     temperature: float | None
     initial_prompt: str | None = None
     progress: dict | DictProxy = field(default_factory=dict)
+    cpu_threads: int = 0
 
 
 def check_inputs_transcribe(file, model, language, device):

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from typer import Argument, Option, Typer
@@ -24,6 +25,10 @@ PROMPT_HELP = "Initial prompt passed to model"
 DEVICE_HELP = "Hardware used to transcribe"
 COMPUTE_HELP = "Data type used in computations"
 TEMP_HELP = "Temperature used for sampling"
+# Calculate default CPU threads as all available cores minus one (minimum 1)
+DEFAULT_CPU_THREADS = max(1, os.cpu_count() - 1) if os.cpu_count() else 4
+MAX_CPU_THREADS = os.cpu_count() if os.cpu_count() else 32
+CPU_THREADS_HELP = f"Number of CPU threads to use (0 = auto, default is {DEFAULT_CPU_THREADS}). Only applies when using CPU."
 
 FINISHED_TEXT = """Thank you for using aTrain
 If you use aTrain in a scientific publication, please cite our paper:
@@ -47,8 +52,18 @@ def transcribe(
     temperature: Annotated[
         float | None, Option(help=TEMP_HELP, min=0.0, max=1.0)
     ] = None,
+    cpu_threads: Annotated[
+        int, Option(help=CPU_THREADS_HELP, min=0)
+    ] = DEFAULT_CPU_THREADS,
 ):
     """Start transcription process for an audio file"""
+    # Cap cpu_threads to maximum available if it exceeds the limit
+    if cpu_threads > MAX_CPU_THREADS:
+        print(
+            f"Warning: Requested {cpu_threads} CPU threads, but only {MAX_CPU_THREADS} available. Using {MAX_CPU_THREADS} threads."
+        )
+        cpu_threads = MAX_CPU_THREADS
+
     file, file_id, timestamp = prepare_transcription(file=file)
     try:
         check_inputs_transcribe(file, model, language, device)
@@ -65,6 +80,7 @@ def transcribe(
             timestamp=timestamp,
             temperature=temperature,
             initial_prompt=prompt,
+            cpu_threads=cpu_threads,
         )
         _transcribe(settings)
         print(FINISHED_TEXT)

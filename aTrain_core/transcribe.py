@@ -113,6 +113,7 @@ def run_transcription(
             model_size_or_path=model_path.as_posix(),
             device="cuda" if settings.device == Device.GPU else "cpu",
             compute_type=settings.compute_type.value,
+            cpu_threads=settings.cpu_threads,
         )
         model_type = load_model_config_file()[settings.model]["type"]
         write_logfile(f"Transcribing with {model_type} model.", settings.file_id)
