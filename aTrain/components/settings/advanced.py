@@ -56,10 +56,6 @@ def input_cpu_threads():
     state = app.storage.general
     tooltip = f"Number of CPU threads to use (default: {DEFAULT_CPU_THREADS}). Only applies when using CPU."
 
-    # Set default if not already set
-    if "cpu_threads" not in state:
-        state["cpu_threads"] = DEFAULT_CPU_THREADS
-
     with ui.column().classes("w-full gap-2"):
         with ui.row(align_items="center").classes("w-full justify-between"):
             ui.label("CPU Threads").classes("font-bold text-dark")
@@ -76,10 +72,14 @@ def input_cpu_threads():
             )
             number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
             number.bind_value(state, "cpu_threads")
+<<<<<<< HEAD
 
             reset_btn = ui.button(icon="refresh", color="gray-300")
+=======
+            reset_btn = ui.button(icon="refresh", color="gray")
+>>>>>>> 53bc7bf25bc5f6e93dc2a20fc8d7d1ab5037704e
             reset_btn.props("flat dense round size=sm").tooltip("Reset to default")
-            reset_btn.on_click(lambda: setattr(number, "value", DEFAULT_CPU_THREADS))
+            reset_btn.on_click(lambda: number.set_value(DEFAULT_CPU_THREADS))
 
 
 def input_temperature():
