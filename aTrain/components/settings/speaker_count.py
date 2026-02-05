@@ -15,6 +15,6 @@ def input_speaker_count():
             reset_btn.props("flat dense round size=sm").tooltip(
                 "Reset to default (auto-detect)"
             )
-            reset_btn.on_click(lambda: setattr(input, "value", None))
+            reset_btn.on_click(lambda: input.set_value(None))
 
     column.bind_visibility(app.storage.general, "speaker_detection")

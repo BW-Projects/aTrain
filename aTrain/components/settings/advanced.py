@@ -95,7 +95,7 @@ def input_temperature():
             reset_btn.props("flat dense round size=sm").tooltip(
                 "Reset to default (auto)"
             )
-            reset_btn.on_click(lambda: setattr(number, "value", None))
+            reset_btn.on_click(lambda: number.set_value(None))
 
     # Fix wrong default setting from version 1.4.0, TODO: Revert state name to "temperature" in upcoming releases
     app.storage.general["temperature"] = None
