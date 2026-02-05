@@ -10,10 +10,6 @@ Beta Versions available for **MacOS (Apple Silicon)** and **Debian** package [he
 
 Cite the published paper if you used aTrain for your research: [Take the aTrain. Introducing an Interface for the Accessible Transcription of Interviews.](https://www.sciencedirect.com/science/article/pii/S2214635024000066)
 
-## Becoming a developer
-Please refer to [Developer wiki page](https://github.com/JuergenFleiss/aTrain/wiki/Development:-Branching,-contributing-and-releases) for the details on how to contribute to the project and other useful information for developers.
-
-
 ## About aTrain
 
 aTrain offers the following benefits:
@@ -80,6 +76,4 @@ Planned in the near future.
 - Allow for saving settings and defaults (currently resets after each transcription)  **Implemented in v1.4.0
 
 ## Attribution
-The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/). 
-
-
+The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/).
