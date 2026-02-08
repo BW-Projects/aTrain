@@ -8,7 +8,9 @@ from platformdirs import user_documents_path
 
 ATRAIN_DIR = user_documents_path() / "aTrain"
 MODELS_DIR = ATRAIN_DIR / "models"
-if find_spec("aTrain"):
++if os.environ.get("FLATPAK_ID"):
++    REQUIRED_MODELS_DIR = MODELS_DIR
+elif find_spec("aTrain"):
     REQUIRED_MODELS_DIR = cast(Path, files("aTrain") / "required_models")
 else:
     REQUIRED_MODELS_DIR = MODELS_DIR
