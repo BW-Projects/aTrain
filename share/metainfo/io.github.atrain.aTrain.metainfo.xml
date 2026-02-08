@@ -4,7 +4,7 @@
   <metadata_license>GPL-3.0-or-later</metadata_license>
   <project_license>MIT</project_license>
   <name>aTrain</name>
-  <summary
+  <summary>
     Offline transcription of speech recordings, including speaker diarization, utilizing state-of-the-art machine learning models.</summary>
   <description>
     <p>
@@ -17,7 +17,8 @@
       <li>Automatic speech-to-text transcription</li>
       <li>Speaker diarization</li>
       <li>GPU acceleration with CUDA support</li>
-      <li>Export transcriptions in various formats, including MAXQDA, ATLAS.ti and nVivo compatible output, </li>
+      <li
+            >Export transcriptions in various formats, including MAXQDA, ATLAS.ti and nVivo compatible output, </li>
       <li>Completely offline - all processing done locally</li>
     </ul>
   </description>
