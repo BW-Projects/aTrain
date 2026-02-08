@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
   <id>io.github.atrain.aTrain</id>
-  <metadata_license>GPL-3.0-or-later</metadata_license>
-  <project_license>MIT</project_license>
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
   <name>aTrain</name>
   <summary>
     Offline transcription of speech recordings, including speaker diarization, utilizing state-of-the-art machine learning models.</summary>
