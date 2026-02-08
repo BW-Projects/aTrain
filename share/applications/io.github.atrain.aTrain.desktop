@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=aTrain
+GenericName=Speech Transcription
+Comment=aTrain is a tool for automatically transcribing speech recordings utilizing state-of-the-art machine learning models without uploading any data.
+Exec=run-atrain.sh
+Icon=io.github.atrain.aTrain
+Terminal=false
+Categories=AudioVideo;Audio;Utility;
+Keywords=transcription;speech;whisper;audio;machine-learning;
+StartupNotify=true
