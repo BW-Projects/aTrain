@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import os
 from importlib.resources import files
 from importlib.util import find_spec
@@ -10,6 +11,10 @@ FLATPAK = bool(os.environ.get("FLATPAK_ID"))
 # pyannote requires an explicit opt-in/out for telemetry metrics
 if FLATPAK:
     os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
+    try:
+        mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
 ATRAIN_DIR = user_documents_path() / "aTrain"
 MODELS_DIR = ATRAIN_DIR / "models"
 if FLATPAK:

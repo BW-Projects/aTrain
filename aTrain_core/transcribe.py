@@ -93,7 +93,7 @@ def load_audio(settings: Settings) -> tuple[np.ndarray, int]:
         audio_array = decode_audio(file, sampling_rate=SAMPLING_RATE)
     except Exception as e:
         write_logfile(f"File or path invalid: {e}", settings.file_id)
-        raise Exception("""Check file & path: File either has no audio or the name of the file path or file includes spaces. 
+        raise Exception("""Check file & path: File either has no audio or the name of the file path or file includes spaces.
                         Please remove or exchange them with underscores.""")
     write_logfile("Audio file loaded and decoded", settings.file_id)
     audio_duration = int(len(audio_array) / SAMPLING_RATE)
