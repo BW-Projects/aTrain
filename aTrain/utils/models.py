@@ -5,9 +5,9 @@ import urllib.request
 from concurrent.futures.process import BrokenProcessPool
 from multiprocessing import Manager
 
-from aTrain_core.settings import load_languages
 from aTrain_core.globals import MODELS_DIR, REQUIRED_MODELS_DIR
 from aTrain_core.load_resources import get_model, load_model_config_file, remove_model
+from aTrain_core.settings import load_languages
 from nicegui import run, ui
 from nicegui.run import SubprocessException
 from nicegui.run import setup as setup_process_pool
@@ -17,7 +17,11 @@ from aTrain.components.dialogs.error import dialog_error
 
 
 def read_downloaded_models() -> list:
-    directories_to_search = [MODELS_DIR, REQUIRED_MODELS_DIR]
+    if os.environ.get("FLATPAK_ID"):
+        print("Flatpak detected: scanning MODELS_DIR only for models")
+        directories_to_search = [MODELS_DIR]
+    else:
+        directories_to_search = [MODELS_DIR, REQUIRED_MODELS_DIR]
     all_downloaded_models = []
 
     for directory in directories_to_search:
