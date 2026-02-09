@@ -27,9 +27,7 @@ class CustomUpload(ui.upload):
 
 def input_file() -> CustomUpload:
     allowed_files = "".join(x for x in str(load_formats()) if x not in "[]'")
-    # Keep the file input in the DOM for native (QtWebEngine) file dialogs.
-    # `hidden` (display:none) can block programmatic file pickers in some WebViews.
-    uploader = CustomUpload().classes("invisible absolute w-1 h-1")
+    uploader = CustomUpload().classes("hidden")
     uploader.props(f"accept='{allowed_files}'")
 
     with ui.column().classes("gap-2"):
