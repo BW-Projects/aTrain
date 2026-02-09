@@ -1,3 +1,7 @@
+from pathlib import Path
+from types import SimpleNamespace
+
+from aTrain_core.globals import FLATPAK
 from nicegui import Client, ui
 
 from aTrain.components.settings.advanced import advanced_settings
@@ -28,9 +32,26 @@ async def page(client: Client):
         with ui.row().classes("w-full justify-between items-center"):
             settings_btn = ui.button("Advanced Settings", color="gray-100")
             settings_btn.props("size=0.8rem unelevated no-caps icon=settings")
-            start_btn = ui.button("Start", on_click=file.upload, color="dark")
+            if FLATPAK:
+
+                async def start_from_selected():
+                    if not getattr(file, "selected_path", None):
+                        ui.notify("Please select a file first", color="negative")
+                        return
+                    payload = SimpleNamespace(
+                        name=file.selected_name,
+                        content=Path(file.selected_path),
+                    )
+                    await start_transcription(payload)
+
+                start_btn = ui.button(
+                    "Start", on_click=start_from_selected, color="dark"
+                )
+            else:
+                start_btn = ui.button("Start", on_click=file.upload, color="dark")
             start_btn.props("no-caps unelevated")
             advanced_settings(open=False)
 
-    file.on_upload(start_transcription)
+    if not FLATPAK:
+        file.on_upload(start_transcription)
     settings_btn.on_click(lambda: advanced_settings(open=True))
