@@ -6,9 +6,13 @@ from typing import cast
 
 from platformdirs import user_documents_path
 
+FLATPAK = bool(os.environ.get("FLATPAK_ID"))
+# pyannote requires an explicit opt-in/out for telemetry metrics
+if FLATPAK:
+    os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
 ATRAIN_DIR = user_documents_path() / "aTrain"
 MODELS_DIR = ATRAIN_DIR / "models"
-if os.environ.get("FLATPAK_ID"):
+if FLATPAK:
     REQUIRED_MODELS_DIR = MODELS_DIR
 elif find_spec("aTrain"):
     REQUIRED_MODELS_DIR = cast(Path, files("aTrain") / "required_models")
