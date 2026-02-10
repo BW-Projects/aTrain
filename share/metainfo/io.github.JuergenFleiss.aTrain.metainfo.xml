@@ -28,13 +28,17 @@
   <url type="vcs-browser">https://github.com/JuergenFleiss/aTrain</url>
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/main/docs/images/screenshot_1.webp</image>
+      <caption>Transcription screen</caption>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_1.webp</image>
     </screenshot>
     <screenshot>
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/main/docs/images/screenshot_2.webp</image>
+      <caption>Archive screen</caption>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_2.webp</image>
     </screenshot>
   </screenshots>
-  <developer_name>Armin Haberl, Jürgen Fleiß</developer_name>
+  <developer id="io.github.JuergenFleiss">
+    <name>Armin Haberl, Jürgen Fleiß</name>
+  </developer>
   <content_rating type="oars-1.1" />
   <releases>
     <release version="1.4.1" date="2026-01-01">
