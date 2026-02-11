@@ -28,12 +28,20 @@
   <url type="vcs-browser">https://github.com/JuergenFleiss/aTrain</url>
   <screenshots>
     <screenshot type="default">
-      <caption>Transcription screen</caption>
+      <caption>Main Interface.</caption>
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_1.webp</image>
     </screenshot>
     <screenshot>
-      <caption>Archive screen</caption>
+      <caption>Transcription Archive Screen.</caption>
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_2.webp</image>
+    </screenshot>
+    <screenshot>
+      <caption>Model Manager Screen.</caption>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_3.webp</image>
+    </screenshot>
+    <screenshot>
+      <caption>Advanced Settings Screen.</caption>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_4.webp</image>
     </screenshot>
   </screenshots>
   <developer id="io.github.JuergenFleiss">
@@ -41,9 +49,9 @@
   </developer>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="1.4.1" date="2026-01-01">
+    <release version="1.4.2" date="2026-02-11">
       <description>
-        <p>Latest release with bugfixes for aTrain 1.4.0</p>
+        <p>First release for Flatpak. Includes all features up to aTrain 1.4.1 and all bugfixes and minor improvements (CPU thread setting) for the next minor aTrain 1.4.2 Windows release.</p>
       </description>
     </release>
   </releases>
