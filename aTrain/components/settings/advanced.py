@@ -56,7 +56,7 @@ def input_cpu_threads():
     state = app.storage.general
     tooltip = f"Number of CPU threads to use (default: {DEFAULT_CPU_THREADS}). Only applies when using CPU."
 
-    with ui.column().classes("w-full gap-2"):
+    with ui.column().classes("w-full gap-2") as input_cpu:
         with ui.row(align_items="center").classes("w-full justify-between"):
             ui.label("CPU Threads").classes("font-bold text-dark")
             ui.icon("info_outline", size="sm", color="grey").tooltip(tooltip)
@@ -75,6 +75,7 @@ def input_cpu_threads():
             reset_btn = ui.button(icon="refresh", color="gray-300")
             reset_btn.props("flat dense round size=sm").tooltip("Reset to default")
             reset_btn.on_click(lambda: number.set_value(DEFAULT_CPU_THREADS))
+    input_cpu.bind_visibility_from(state, "GPU", lambda x: not x)
 
 
 def input_temperature():
