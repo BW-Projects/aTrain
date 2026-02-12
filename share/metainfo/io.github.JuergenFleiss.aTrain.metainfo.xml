@@ -5,7 +5,7 @@
   <project_license>MIT</project_license>
   <name>aTrain</name>
   <summary>
-    Offline transcription of speech recordings, including speaker diarization, utilizing state-of-the-art machine learning models.</summary>
+    Offline transcription of speech recordings</summary>
   <description>
     <p>
       aTrain is a tool for automatically transcribing speech recordings utilizing state-of-the-art machine learning models without uploading any data. It was developed by researchers at the Business Analytics and Data Science-Center at the University of Graz and tested by researchers from the Know-Center Graz.
@@ -17,8 +17,7 @@
       <li>Automatic speech-to-text transcription</li>
       <li>Speaker diarization</li>
       <li>GPU acceleration with CUDA support</li>
-      <li
-            >Export transcriptions in various formats, including MAXQDA, ATLAS.ti and nVivo compatible output, </li>
+      <li>Export transcriptions in various formats, including MAXQDA, ATLAS.ti and nVivo compatible output, </li>
       <li>Completely offline - all processing done locally</li>
     </ul>
   </description>
@@ -29,22 +28,22 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main Interface.</caption>
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_1.webp</image>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_1.png</image>
     </screenshot>
     <screenshot>
       <caption>Transcription Archive Screen.</caption>
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_2.webp</image>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_2.png</image>
     </screenshot>
     <screenshot>
       <caption>Model Manager Screen.</caption>
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_3.webp</image>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_3.png</image>
     </screenshot>
     <screenshot>
       <caption>Advanced Settings Screen.</caption>
-      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_4.webp</image>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_4.png</image>
     </screenshot>
   </screenshots>
-  <developer id="io.github.JuergenFleiss">
+  <developer id="io.github.juergenfleiss">
     <name>Armin Haberl, Jürgen Fleiß</name>
   </developer>
   <content_rating type="oars-1.1" />
