@@ -31,7 +31,7 @@
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_1.png</image>
     </screenshot>
     <screenshot>
-      <caption>Transcription Archive Screen.</caption>
+      <caption>Advanced Settings Screen.</caption>
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_2.png</image>
     </screenshot>
     <screenshot>
@@ -39,8 +39,12 @@
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_3.png</image>
     </screenshot>
     <screenshot>
-      <caption>Advanced Settings Screen.</caption>
+      <caption>Transcription Archive Screen.</caption>
       <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_4.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Transcription in progress.</caption>
+      <image type="source">https://raw.githubusercontent.com/JuergenFleiss/aTrain/v1.4.1/docs/images/screenshot_5.png</image>
     </screenshot>
   </screenshots>
   <developer id="io.github.juergenfleiss">
