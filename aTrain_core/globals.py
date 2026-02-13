@@ -5,7 +5,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import cast
 
-from platformdirs import user_documents_path
+from platformdirs import user_data_path, user_documents_path
 
 FLATPAK = bool(os.environ.get("FLATPAK_ID"))
 # pyannote requires an explicit opt-in/out for telemetry metrics
@@ -16,7 +16,7 @@ if FLATPAK:
     except RuntimeError:
         pass
 ATRAIN_DIR = user_documents_path() / "aTrain"
-MODELS_DIR = ATRAIN_DIR / "models"
+MODELS_DIR = (user_data_path() / "models") if FLATPAK else (ATRAIN_DIR / "models")
 if FLATPAK:
     REQUIRED_MODELS_DIR = MODELS_DIR
 elif find_spec("aTrain"):
