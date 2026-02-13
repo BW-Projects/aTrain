@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
-  <id>io.github.juergenfleiss.atrain</id>
+  <id>io.github.juergenfleiss.aTrain</id>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <name>aTrain</name>
@@ -24,9 +24,9 @@
   </description>
   <launchable
         type="desktop-id"
-    >io.github.juergenfleiss.atrain.desktop</launchable>
-  <url type="homepage">https://github.com/JuergenFleiss/atrain</url>
-  <url type="bugtracker">https://github.com/JuergenFleiss/atrain/issues</url>
+    >io.github.juergenfleiss.aTrain.desktop</launchable>
+  <url type="homepage">https://github.com/JuergenFleiss/aTrain</url>
+  <url type="bugtracker">https://github.com/JuergenFleiss/aTrain/issues</url>
   <url type="vcs-browser">https://github.com/JuergenFleiss/aTrain</url>
   <screenshots>
     <screenshot type="default">
