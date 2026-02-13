@@ -24,7 +24,7 @@
   </description>
   <launchable
         type="desktop-id"
-    >io.github.JuergenFleiss.aTrain.desktop</launchable>
+    >io.github.juergenfleiss.atrain.desktop</launchable>
   <url type="homepage">https://github.com/JuergenFleiss/atrain</url>
   <url type="bugtracker">https://github.com/JuergenFleiss/atrain/issues</url>
   <url type="vcs-browser">https://github.com/JuergenFleiss/aTrain</url>
