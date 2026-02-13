@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import time
+from dataclasses import asdict, is_dataclass
 from datetime import datetime
 
 import numpy as np
@@ -128,8 +129,14 @@ def named_tuple_to_dict(obj):
         return {key: named_tuple_to_dict(value) for key, value in obj.items()}
     elif isinstance(obj, list):
         return [named_tuple_to_dict(value) for value in obj]
+    elif is_dataclass(obj):
+        return {key: named_tuple_to_dict(value) for key, value in asdict(obj).items()}
     elif isnamedtupleinstance(obj):
         return {key: named_tuple_to_dict(value) for key, value in obj._asdict().items()}
+    elif hasattr(obj, "_asdict") and callable(obj._asdict):
+        return {key: named_tuple_to_dict(value) for key, value in obj._asdict().items()}
+    elif hasattr(obj, "__dict__"):
+        return {key: named_tuple_to_dict(value) for key, value in vars(obj).items()}
     elif isinstance(obj, tuple):
         return tuple(named_tuple_to_dict(value) for value in obj)
     else:
