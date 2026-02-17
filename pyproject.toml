@@ -29,9 +29,7 @@ dependencies = [
   "typer==0.16.0",
   "nicegui==2.21.1",
   "pywebview==6.1",
-  "pyqt5; sys_platform == 'linux'",
-  "pyqtwebengine; sys_platform == 'linux'",
-  "pywebview[qt]; sys_platform == 'linux'",
+  "pywebview[GTK]; sys_platform == 'linux'",
   "dask; sys_platform == 'linux'",
 ]
 
