@@ -37,7 +37,7 @@ def start(
 ):
     """Start aTrain."""
     print("Running aTrain")
-    with keep.running():
+    if FLATPAK:
         ui.run(
             native=native,
             reload=reload,
@@ -45,3 +45,12 @@ def start(
             favicon=cast(Path, files("aTrain") / "static" / "favicon.ico"),
             window_size=(1280, 720) if native else None,
         )
+    else:
+        with keep.running():
+            ui.run(
+                native=native,
+                reload=reload,
+                title="aTrain",
+                favicon=cast(Path, files("aTrain") / "static" / "favicon.ico"),
+                window_size=(1280, 720) if native else None,
+            )
