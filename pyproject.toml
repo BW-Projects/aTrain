@@ -28,7 +28,8 @@ dependencies = [
   "faster-whisper==1.2.1",
   "pandas==2.3.3",
   "pyannote.audio==4.0.3; sys_platform != 'linux'",
-  "pyannote.audio>4.0.3; sys_platform == 'linux'",
+  "pyannote.audio>4.0.3; sys_platform == 'linux' and platform_machine == 'x86_64'",
+  "pyannote.audio==4.0.3; sys_platform == 'linux' and platform_machine != 'x86_64'",
   "numpy==2.2.2",
   "werkzeug==3.0.3",
   "huggingface-hub==0.30.2",
@@ -37,11 +38,6 @@ dependencies = [
   "torch==2.8.0; sys_platform == 'darwin'",
   "typer==0.16.0",
   "platformdirs==4.5.1",
-]
-
-[project.optional-dependencies]
-cuda = [
-  "torch==2.9.1+cu128; sys_platform == 'linux'",
 ]
 
 [tool.setuptools.packages.find]
