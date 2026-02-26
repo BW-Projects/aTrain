@@ -14,7 +14,7 @@ from faster_whisper.audio import decode_audio
 # keep this narrow to that single message and module.
 warnings.filterwarnings(
     "ignore",
-    message=r".*torchcodec is not installed correctly so built-in audio decoding will fail.*",
+    message=r"(?s).*torchcodec is not installed correctly so built-in audio decoding will fail.*",
     category=UserWarning,
     module=r"pyannote\.audio\.core\.io",
 )
