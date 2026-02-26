@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 from datetime import datetime
 from multiprocessing import Manager, Process
 from multiprocessing.managers import DictProxy
@@ -8,6 +9,16 @@ from pathlib import Path
 import numpy as np
 from faster_whisper import WhisperModel
 from faster_whisper.audio import decode_audio
+
+# pyannote imports can emit a non-actionable torchcodec warning in our runtime;
+# keep this narrow to that single message and module.
+warnings.filterwarnings(
+    "ignore",
+    message=r".*torchcodec is not installed correctly so built-in audio decoding will fail.*",
+    category=UserWarning,
+    module=r"pyannote\.audio\.core\.io",
+)
+
 from pyannote.audio import Pipeline
 from pyannote.audio.pipelines.speaker_diarization import DiarizeOutput
 from pyannote.audio.pipelines.utils.hook import ProgressHook
