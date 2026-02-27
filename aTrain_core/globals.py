@@ -8,8 +8,9 @@ from typing import cast
 from platformdirs import user_data_path, user_documents_path
 
 FLATPAK = bool(os.environ.get("FLATPAK_ID"))
+SNAP = bool(os.environ.get("SNAP")) or bool(os.environ.get("SNAP_ID"))
 # pyannote requires an explicit opt-in/out for telemetry metrics
-if FLATPAK:
+if FLATPAK or SNAP:
     os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
     try:
         mp.set_start_method("spawn", force=True)
