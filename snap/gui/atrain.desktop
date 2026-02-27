@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=aTrain
+GenericName=Speech Transcription
+Comment=Offline speech transcription
+Exec=atrain
+Icon=${SNAP}/meta/gui/icon.svg
+Terminal=false
+Categories=AudioVideo;Audio;Utility;
+Keywords=transcription;speech;whisper;audio;machine-learning;
+StartupNotify=true
+StartupWMClass=aTrain
