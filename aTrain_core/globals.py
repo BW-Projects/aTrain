@@ -16,7 +16,10 @@ if FLATPAK or SNAP:
         mp.set_start_method("spawn", force=True)
     except RuntimeError:
         pass
-ATRAIN_DIR = user_documents_path() / "aTrain"
+if SNAP and os.environ.get("ATRAIN_USER_DIR"):
+    ATRAIN_DIR = Path(os.environ["ATRAIN_USER_DIR"])
+else:
+    ATRAIN_DIR = user_documents_path() / "aTrain"
 MODELS_DIR = (user_data_path() / "models") if FLATPAK else (ATRAIN_DIR / "models")
 if FLATPAK:
     REQUIRED_MODELS_DIR = MODELS_DIR
