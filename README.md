@@ -5,7 +5,7 @@ aTrain-core: A command line interface for the transcription of audio and video f
 
 Learn [how to install](https://github.com/JuergenFleiss/atrain_core#installation-%EF%B8%8F) and [how to use](https://github.com/JuergenFleiss/atrain_core#usage-) it.
 
-📝 If you use aTrain for a publication, please cite [our paper](https://www.sciencedirect.com/science/article/pii/S2214635024000066?via%3Dihub) as per our [license](https://github.com/JuergenFleiss/atrain_core?tab=License-1-ov-file). 
+📝 If you use aTrain for a publication, please cite [our paper](https://www.sciencedirect.com/science/article/pii/S2214635024000066?via%3Dihub). 
 
 ## Becoming a developer
 Please refer to [Developer wiki page](https://github.com/JuergenFleiss/aTrain/wiki/Development:-Branching,-contributing-and-releases) for the details on how to contribute to the project and other useful information for developers.
@@ -150,5 +150,6 @@ aTrain_core remove --model <MODEL>
 
 ## System requirements
 We support Windows, Debian and MacOS (tested with M1 processors only). GPU transcription with NVIDIA CUDA GPUs is supported in Windows and Debian. 
+
 
 
