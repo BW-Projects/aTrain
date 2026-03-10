@@ -9,28 +9,24 @@ from typing import cast
 from platformdirs import user_data_path, user_documents_path
 
 FLATPAK = bool(os.environ.get("FLATPAK_ID"))
-SNAP = bool(os.environ.get("SNAP")) or bool(os.environ.get("SNAP_ID"))
 # pyannote requires an explicit opt-in/out for telemetry metrics
-if FLATPAK or SNAP:
+if FLATPAK:
     os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
 
-# Keep `spawn` for Snap and Flatpak x86; avoid forcing it on Flatpak ARM.
-if SNAP or (FLATPAK and platform.machine().lower() not in {"aarch64", "arm64"}):
+# Keep `spawn` for Flatpak x86; avoid forcing it on Flatpak ARM.
+if FLATPAK and platform.machine().lower() not in {"aarch64", "arm64"}:
     try:
         mp.set_start_method("spawn", force=True)
     except RuntimeError:
         pass
 
-# snapcraft directories
-if SNAP and os.environ.get("ATRAIN_USER_DIR"):
-    ATRAIN_DIR = Path(os.environ["ATRAIN_USER_DIR"])
-else:
-    ATRAIN_DIR = user_documents_path() / "aTrain"
-MODELS_DIR = (
-    (user_data_path() / "models") if (FLATPAK or SNAP) else (ATRAIN_DIR / "models")
+ATRAIN_DIR = (
+    Path(os.environ["ATRAIN_USER_DIR"])
+    if os.environ.get("ATRAIN_USER_DIR")
+    else (user_documents_path() / "aTrain")
 )
+MODELS_DIR = (user_data_path() / "models") if FLATPAK else (ATRAIN_DIR / "models")
 
-# flatpak directories.
 if FLATPAK:
     flatpak_required_models_dir = Path("/app/share/atrain-required-models")
     REQUIRED_MODELS_DIR = (
@@ -38,12 +34,11 @@ if FLATPAK:
         if flatpak_required_models_dir.is_dir()
         else MODELS_DIR
     )
-elif SNAP:
-    REQUIRED_MODELS_DIR = MODELS_DIR
 elif find_spec("aTrain"):
     REQUIRED_MODELS_DIR = cast(Path, files("aTrain") / "required_models")
 else:
     REQUIRED_MODELS_DIR = MODELS_DIR
+
 REQUIRED_MODELS = ["speaker-detection", "large-v3-turbo"]
 TRANSCRIPT_DIR = ATRAIN_DIR / "transcriptions"
 METADATA_FILENAME = "metadata.txt"
