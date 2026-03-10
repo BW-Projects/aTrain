@@ -15,6 +15,23 @@ raise SystemExit(1 if missing else 0)
 PY
 }
 
+transcription_dir=""
+
+while (($#)); do
+    [[ "$1" == "--transcription-dir" ]] || break
+    [[ $# -ge 2 ]] || {
+        echo "Missing path after --transcription-dir" >&2
+        exit 2
+    }
+    transcription_dir="$2"
+    shift 2
+done
+
+if [[ -n "$transcription_dir" ]]; then
+    mkdir -p "$transcription_dir"/{transcriptions,settings,models}
+    export ATRAIN_USER_DIR="$transcription_dir"
+fi
+
 for dir in \
     /app/lib/python*/site-packages/nvidia/*/lib \
     /usr/lib/*/GL/default/lib \
