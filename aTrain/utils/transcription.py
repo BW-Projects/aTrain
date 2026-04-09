@@ -27,6 +27,7 @@ class State(TypedDict):
     compute_type: str
     temperature_override: float | None
     initial_prompt: str | None
+    cpu_threads: int
 
 
 async def start_transcription(file: events.UploadEventArguments):
@@ -52,6 +53,7 @@ async def start_transcription(file: events.UploadEventArguments):
                 timestamp=timestamp,
                 temperature=state.get("temperature_override"),
                 initial_prompt=state.get("initial_prompt") or None,
+                cpu_threads=int(state.get("cpu_threads", 0)) or 0,
                 progress=progress,
             )
             check_inputs_transcribe(
