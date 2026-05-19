@@ -80,8 +80,8 @@ Planned in the near future.
 - Batch Processing, allowing to have files queued for transcription
 - Add options for more verbatim output
 - Make adding custom models more easy
-- Stable Debian and MacOS installers
-- Somehow getting that flatpak package to work
+- MacOS installers
+- Somehow getting that flatpak package to work **Published 1.4.1 on Flathub.
 - Customization of output naming
 - Allowing users to setting the output directory
 - Allow for saving settings and defaults (currently resets after each transcription)  **Implemented in v1.4.0
