@@ -1,3 +1,20 @@
+# Local development setup
+
+aTrain uses [uv](https://docs.astral.sh/uv/) for environment and dependency
+management. uv is the recommended workflow for local development and is what
+CI uses.
+
+```bash
+uv sync                 # install runtime dependencies
+uv run aTrain init      # download required ML models
+uv run aTrain start     # run the app
+```
+
+If you do not have uv installed yet, see the
+[uv installation guide](https://docs.astral.sh/uv/#installation) — a
+single-command install via `curl` or `pipx install uv` works on Linux,
+macOS and Windows.
+
 # Branching
 
 As the project grows and community contributions become more frequent (thanks all!) we opted to adopt a branching model with the intention to make it easier and clearer for contributors to make pull requests.
