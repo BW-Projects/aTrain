@@ -3,6 +3,7 @@ from pathlib import Path
 from typer import Argument, Option, Typer
 from typing_extensions import Annotated
 
+from aTrain_core.globals import DEFAULT_CPU_THREADS, MAX_CPU_THREADS
 from aTrain_core.load_resources import (
     download_all_models,
     get_model,
@@ -24,6 +25,7 @@ PROMPT_HELP = "Initial prompt passed to model"
 DEVICE_HELP = "Hardware used to transcribe"
 COMPUTE_HELP = "Data type used in computations"
 TEMP_HELP = "Temperature used for sampling"
+CPU_THREADS_HELP = f"Number of CPU threads to use (0 = auto, default is {DEFAULT_CPU_THREADS}). Only applies when using CPU."
 
 FINISHED_TEXT = """Thank you for using aTrain
 If you use aTrain in a scientific publication, please cite our paper:
@@ -47,6 +49,9 @@ def transcribe(
     temperature: Annotated[
         float | None, Option(help=TEMP_HELP, min=0.0, max=1.0)
     ] = None,
+    cpu_threads: Annotated[
+        int, Option(help=CPU_THREADS_HELP, min=0, max=MAX_CPU_THREADS)
+    ] = DEFAULT_CPU_THREADS,
 ):
     """Start transcription process for an audio file"""
     file, file_id, timestamp = prepare_transcription(file=file)
@@ -65,6 +70,7 @@ def transcribe(
             timestamp=timestamp,
             temperature=temperature,
             initial_prompt=prompt,
+            cpu_threads=cpu_threads,
         )
         _transcribe(settings)
         print(FINISHED_TEXT)

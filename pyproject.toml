@@ -25,14 +25,15 @@ license = { file = "LICENSE" }
 requires-python = ">=3.11"
 
 dependencies = [
-  "faster-whisper==1.0.2",
+  "faster-whisper==1.2.1",
   "pandas==2.3.3",
-  "pyannote.audio==4.0.3",
+  "pyannote.audio==4.0.3; sys_platform != 'linux'",
+  "pyannote.audio>4.0.3; sys_platform == 'linux'",
   "numpy==2.2.2",
   "werkzeug==3.0.3",
   "huggingface-hub==0.30.2",
   "torch==2.8.0+cu128; sys_platform == 'win32'",
-  "torch==2.8.0+cu128; sys_platform == 'linux'",
+  "torch==2.9.1; sys_platform == 'linux'",
   "torch==2.8.0; sys_platform == 'darwin'",
   "typer==0.16.0",
   "platformdirs==4.5.1",

@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 from datetime import datetime
 from multiprocessing import Manager, Process
 from multiprocessing.managers import DictProxy
@@ -8,6 +9,16 @@ from pathlib import Path
 import numpy as np
 from faster_whisper import WhisperModel
 from faster_whisper.audio import decode_audio
+
+# pyannote imports can emit a non-actionable torchcodec warning in our runtime;
+# keep this narrow to that single message and module.
+warnings.filterwarnings(
+    "ignore",
+    message=r"(?s).*torchcodec is not installed correctly so built-in audio decoding will fail.*",
+    category=UserWarning,
+    module=r"pyannote\.audio\.core\.io",
+)
+
 from pyannote.audio import Pipeline
 from pyannote.audio.pipelines.speaker_diarization import DiarizeOutput
 from pyannote.audio.pipelines.utils.hook import ProgressHook
@@ -93,7 +104,7 @@ def load_audio(settings: Settings) -> tuple[np.ndarray, int]:
         audio_array = decode_audio(file, sampling_rate=SAMPLING_RATE)
     except Exception as e:
         write_logfile(f"File or path invalid: {e}", settings.file_id)
-        raise Exception("""Check file & path: File either has no audio or the name of the file path or file includes spaces. 
+        raise Exception("""Check file & path: File either has no audio or the name of the file path or file includes spaces.
                         Please remove or exchange them with underscores.""")
     write_logfile("Audio file loaded and decoded", settings.file_id)
     audio_duration = int(len(audio_array) / SAMPLING_RATE)
@@ -113,6 +124,7 @@ def run_transcription(
             model_size_or_path=model_path.as_posix(),
             device="cuda" if settings.device == Device.GPU else "cpu",
             compute_type=settings.compute_type.value,
+            cpu_threads=settings.cpu_threads,
         )
         model_type = load_model_config_file()[settings.model]["type"]
         write_logfile(f"Transcribing with {model_type} model.", settings.file_id)
