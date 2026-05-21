@@ -11,9 +11,7 @@ uv run aTrain start     # run the app
 ```
 
 If you do not have uv installed yet, see the
-[uv installation guide](https://docs.astral.sh/uv/#installation) — a
-single-command install via `curl` or `pipx install uv` works on Linux,
-macOS and Windows.
+[uv installation guide](https://docs.astral.sh/uv/#installation).
 
 # Branching
 
