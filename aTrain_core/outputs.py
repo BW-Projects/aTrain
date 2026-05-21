@@ -44,9 +44,10 @@ def create_file_id(file_path, timestamp):
 def create_output_files(result, speaker_detection, file_id):
     """Creates output files based on the transcription result."""
     create_json_file(result, file_id)
-    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=False)
-    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=True)
-    create_txt_file(result, file_id, speaker_detection, maxqda=True, timestamps=True)
+    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=False, brackets=True)
+    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=True)
+    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=False)  # NEW: NVivo output format
+    create_txt_file(result, file_id, speaker_detection, maxqda=True, timestamps=True, brackets=True)
     create_srt_file(result, file_id)
 
 
@@ -57,13 +58,15 @@ def create_json_file(result, file_id):
         json.dump(result, json_file, ensure_ascii=False)
 
 
-def create_txt_file(result, file_id, speaker_detection, timestamps, maxqda):
+def create_txt_file(result, file_id, speaker_detection, timestamps, maxqda, brackets=True):
     """Creates a TXT file for the transcription result."""
     segments = result["segments"]
-    match maxqda, timestamps:
+    match maxqda, timestamps, brackets:
         case True, _:
             filename = "transcription_maxqda.txt"
-        case False, True:
+        case False, True False:
+            filename = "transcription_nvivo.txt" #New: Nvivo format without timestamp brackets
+        case False, True, True:
             filename = "transcription_timestamps.txt"
         case False, False:
             filename = "transcription.txt"
