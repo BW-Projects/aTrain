@@ -1,3 +1,7 @@
+import os
+from typing import Optional
+
+from aTrain_core.globals import FLATPAK
 from aTrain_core.settings import load_formats
 from nicegui import ui
 
@@ -30,7 +34,7 @@ def input_file() -> CustomUpload:
     uploader = CustomUpload().classes("hidden")
     uploader.props(f"accept='{allowed_files}'")
 
-    with ui.column().classes("gap-2"):
+    with ui.column().classes("gap-2") as file_column:
         ui.label("Select File").classes("font-bold text-dark text-md")
         ui.separator()
         with ui.button() as select_button:
@@ -38,8 +42,93 @@ def input_file() -> CustomUpload:
             select_button.props("unelevated no-caps :ripple=false")
             select_button.classes("w-full h-full")
 
-    select_button.bind_text(uploader, "file_text")
-    select_button.bind_icon(uploader, "file_icon")
-    select_button.on_click(uploader.pick_files)
+    if not FLATPAK:
+        select_button.bind_text(uploader, "file_text")
+        select_button.bind_icon(uploader, "file_icon")
+        select_button.on_click(uploader.pick_files)
+        return uploader
+
+    with file_column:
+        file_label = ui.label("No file selected").classes("text-sm text-gray-500")
+
+    uploader.selected_content = None
+    uploader.selected_name = None
+    uploader.selected_path = None
+    select_button.text = "Select File"
+
+    def pick_file_native() -> Optional[str]:
+        try:
+            import gi  # type: ignore
+
+            gi.require_version("Gio", "2.0")
+            gi.require_version("GLib", "2.0")
+            from gi.repository import Gio, GLib  # type: ignore
+
+            bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+            proxy = Gio.DBusProxy.new_sync(
+                bus,
+                Gio.DBusProxyFlags.NONE,
+                None,
+                "org.freedesktop.portal.Desktop",
+                "/org/freedesktop/portal/desktop",
+                "org.freedesktop.portal.FileChooser",
+                None,
+            )
+
+            token = f"atrain{os.getpid()}"
+            options = {
+                "handle_token": GLib.Variant("s", token),
+                "multiple": GLib.Variant("b", False),
+                "directory": GLib.Variant("b", False),
+            }
+
+            result = proxy.call_sync(
+                "OpenFile",
+                GLib.Variant("(ssa{sv})", ("", "Select File", options)),
+                Gio.DBusCallFlags.NONE,
+                -1,
+                None,
+            )
+            handle = result.unpack()[0]
+
+            request = Gio.DBusProxy.new_sync(
+                bus,
+                Gio.DBusProxyFlags.NONE,
+                None,
+                "org.freedesktop.portal.Desktop",
+                handle,
+                "org.freedesktop.portal.Request",
+                None,
+            )
+
+            filename: Optional[str] = None
+            loop = GLib.MainLoop()
+
+            def on_response(_proxy, _sender, _signal, params):
+                nonlocal filename
+                response, results = params.unpack()
+                if response == 0:
+                    uris = results.get("uris")
+                    if uris:
+                        uri = uris[0]
+                        filename = Gio.File.new_for_uri(uri).get_path()
+                loop.quit()
+
+            request.connect("g-signal", on_response)
+            loop.run()
+            return filename
+        except Exception as exc:
+            print(f"Flatpak portal file dialog failed: {exc}")
+            return None
+
+    def on_pick():
+        path = pick_file_native()
+        if not path:
+            return
+        uploader.selected_path = path
+        uploader.selected_name = os.path.basename(path)
+        file_label.text = uploader.selected_name
+
+    select_button.on_click(on_pick)
 
     return uploader

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=aTrain
+GenericName=Speech Transcription
+Comment=Offline speech transcription.
+Exec=run-atrain.sh
+Icon=io.github.juergenfleiss.aTrain
+Terminal=false
+Categories=AudioVideo;Audio;Utility;
+Keywords=transcription;speech;whisper;audio;machine-learning;
+StartupNotify=true

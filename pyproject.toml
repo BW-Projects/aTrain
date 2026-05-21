@@ -2,6 +2,10 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.uv]
+extra-index-url = ["https://download.pytorch.org/whl/cu128"]
+index-strategy = "unsafe-best-match"
+
 [project]
 name = "aTrain"
 description = "aTrain is a tool for automatically transcribing speech recordings utilizing state-of-the-art machine learning models without uploading any data."
@@ -19,15 +23,13 @@ license = { file = "LICENSE" }
 requires-python = ">=3.11"
 
 dependencies = [
-  "aTrain_core@git+https://github.com/JuergenFleiss/atrain_core.git@develop",
+  "aTrain_core@git+https://github.com/JuergenFleiss/atrain_core.git@feature_flatpak",
   "wakepy==0.7.2",
   "show-in-file-manager==1.1.4",
   "typer==0.16.0",
   "nicegui==2.21.1",
   "pywebview==6.1",
-  "pyqt5; sys_platform == 'linux'",
-  "pyqtwebengine; sys_platform == 'linux'",
-  "pywebview[qt]; sys_platform == 'linux'",
+  "pywebview[GTK]; sys_platform == 'linux'",
   "dask; sys_platform == 'linux'",
 ]
 

@@ -1,3 +1,4 @@
+from aTrain_core.cli import DEFAULT_CPU_THREADS, MAX_CPU_THREADS
 from aTrain_core.settings import ComputeType
 from nicegui import ElementFilter, app, ui
 
@@ -9,6 +10,7 @@ def advanced_settings(open: bool):
         ui.label("Advanced Settings").classes("text-lg text-dark font-bold")
         input_gpu()
         input_compute_type()
+        input_cpu_threads()
         input_temperature()
         input_initial_prompt()
         btn = ui.button("Ok", color="dark").props("unelevated no-caps")
@@ -50,13 +52,50 @@ def input_compute_type():
     set_compute_options()
 
 
+def input_cpu_threads():
+    state = app.storage.general
+    tooltip = f"Number of CPU threads to use (default: {DEFAULT_CPU_THREADS}). Only applies when using CPU."
+
+    with ui.column().classes("w-full gap-2"):
+        with ui.row(align_items="center").classes("w-full justify-between"):
+            ui.label("CPU Threads").classes("font-bold text-dark")
+            ui.icon("info_outline", size="sm", color="grey").tooltip(tooltip)
+        ui.separator()
+
+        with ui.row().classes("w-full gap-2 items-center"):
+            number = ui.number(
+                min=1,
+                max=MAX_CPU_THREADS,
+                step=1,
+                precision=0,
+                value=state.get("cpu_threads", DEFAULT_CPU_THREADS),
+            )
+            number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
+            number.bind_value(state, "cpu_threads")
+            reset_btn = ui.button(icon="refresh", color="gray-300")
+            reset_btn.props("flat dense round size=sm").tooltip("Reset to default")
+            reset_btn.on_click(lambda: number.set_value(DEFAULT_CPU_THREADS))
+
+
 def input_temperature():
     with ui.column().classes("w-full gap-2"):
         ui.label("Temperature").classes("font-bold text-dark")
         ui.separator()
-        number = ui.number(min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto")
-        number.props("filled bg-color=gray-100 color=dark clearable").classes("w-full")
-    number.bind_value(app.storage.general, "temperature_override")  # <- New state name
+
+        with ui.row().classes("w-full gap-2 items-center"):
+            number = ui.number(
+                min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto"
+            )
+            number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
+            number.bind_value(
+                app.storage.general, "temperature_override"
+            )  # <- New state name
+
+            reset_btn = ui.button(icon="refresh", color="gray-300")
+            reset_btn.props("flat dense round size=sm").tooltip(
+                "Reset to default (auto)"
+            )
+            reset_btn.on_click(lambda: number.set_value(None))
 
     # Fix wrong default setting from version 1.4.0, TODO: Revert state name to "temperature" in upcoming releases
     app.storage.general["temperature"] = None

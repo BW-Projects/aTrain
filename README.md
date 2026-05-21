@@ -16,11 +16,6 @@ aTrain is a tool for automatically transcribing speech recordings utilizing stat
 
 
 
-
-Or download **installers**, including **MacOS Apple Silicon**, [here](https://business-analytics.uni-graz.at/en/research/atrain/download/).
-
-Please cite the published paper if you used aTrain for your research: [Take the aTrain. Introducing an Interface for the Accessible Transcription of Interviews.](https://www.sciencedirect.com/science/article/pii/S2214635024000066)
-
 ## About aTrain
 
 aTrain offers the following benefits:
@@ -92,7 +87,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup. aTrain
 uses [uv](https://docs.astral.sh/uv/) as its recommended package manager.
 
 ## Attribution
-The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/). 
-
-
-
+The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/).
