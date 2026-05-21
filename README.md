@@ -3,12 +3,18 @@
 ## Accessible Transcription of Interviews
 aTrain is a tool for automatically transcribing speech recordings utilizing state-of-the-art machine learning models without uploading any data. It was developed by researchers at the Business Analytics and Data Science-Center at the University of Graz and tested by researchers from the Know-Center Graz.
 
-**Windows (10 and 11)** users can install aTrain via the Microsoft app store ([Link](https://apps.microsoft.com/store/detail/atrain/9N15Q44SZNS2)) or by downloading the installer from the BANDAS-Center Website ([Link](https://business-analytics.uni-graz.at/de/forschen/atrain/download/)).
 
-Beta Versions available for **MacOS (Apple Silicon)** and **Debian** package [here](https://business-analytics.uni-graz.at/en/research/atrain/download/) (build for Ubuntu 24.04 LTS-based systems).
+<p>
+  <a href="https://flathub.org/apps/io.github.juergenfleiss.aTrain">
+    <img height="58" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://apps.microsoft.com/detail/9N15Q44SZNS2?mode=direct">
+    <img width="220" alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg">
+  </a>
+</p>
 
 
-Cite the published paper if you used aTrain for your research: [Take the aTrain. Introducing an Interface for the Accessible Transcription of Interviews.](https://www.sciencedirect.com/science/article/pii/S2214635024000066)
 
 ## About aTrain
 
@@ -69,11 +75,16 @@ Planned in the near future.
 - Batch Processing, allowing to have files queued for transcription
 - Add options for more verbatim output
 - Make adding custom models more easy
-- Stable Debian and MacOS installers
-- Somehow getting that flatpak package to work
+- MacOS installers
+- Somehow getting that flatpak package to work **Published 1.4.1 on Flathub.
 - Customization of output naming
 - Allowing users to setting the output directory
 - Allow for saving settings and defaults (currently resets after each transcription)  **Implemented in v1.4.0
+
+## For contributors
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup. aTrain
+uses [uv](https://docs.astral.sh/uv/) as its recommended package manager.
 
 ## Attribution
 The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/).
