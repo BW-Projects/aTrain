@@ -86,6 +86,11 @@ Planned in the near future.
 - Allowing users to setting the output directory
 - Allow for saving settings and defaults (currently resets after each transcription)  **Implemented in v1.4.0
 
+## For contributors
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup. aTrain
+uses [uv](https://docs.astral.sh/uv/) as its recommended package manager.
+
 ## Attribution
 The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/). 
 
