@@ -63,13 +63,13 @@ def create_txt_file(result, file_id, speaker_detection, timestamps, maxqda, brac
     """Creates a TXT file for the transcription result."""
     segments = result["segments"]
     match maxqda, timestamps, brackets:
-        case True, _:
+        case True, _, _:
             filename = "transcription_maxqda.txt"
-        case False, True False:
-            filename = "transcription_nvivo.txt" #New: Nvivo format without timestamp brackets
+        case False, True, False:
+            filename = "transcription_nvivo.txt"  # NVivo format: timestamps without brackets
         case False, True, True:
             filename = "transcription_timestamps.txt"
-        case False, False:
+        case False, False, _:
             filename = "transcription.txt"
     file_path = os.path.join(TRANSCRIPT_DIR, file_id, filename)
     with open(file_path, "w", encoding="utf-8") as file:
