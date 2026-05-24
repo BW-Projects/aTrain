@@ -35,6 +35,10 @@ dependencies = [
   "torch==2.8.0+cu128; sys_platform == 'win32'",
   "torch==2.9.1; sys_platform == 'linux'",
   "torch==2.8.0; sys_platform == 'darwin'",
+  # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
+  "torchaudio==2.8.0+cu128; sys_platform == 'win32'",
+  "torchaudio==2.9.1; sys_platform == 'linux'",
+  "torchaudio==2.8.0; sys_platform == 'darwin'",
   "typer==0.16.0",
   "platformdirs==4.5.1",
 ]
