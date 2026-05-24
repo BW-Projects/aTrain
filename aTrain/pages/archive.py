@@ -1,10 +1,9 @@
-from nicegui import ui
-
 from aTrain.components.dialogs.delete import dialog_delete
 from aTrain.layouts.base import base_layout
 from aTrain.utils.archive import delete_transcription as delete
 from aTrain.utils.archive import open_file_directory as show
 from aTrain.utils.archive import read_archive
+from nicegui import ui
 
 
 @ui.page("/archive")

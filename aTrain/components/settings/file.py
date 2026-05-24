@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 from aTrain_core.globals import FLATPAK
 from aTrain_core.settings import load_formats
@@ -56,7 +55,7 @@ def input_file() -> CustomUpload:
     uploader.selected_path = None
     select_button.text = "Select File"
 
-    def pick_file_native() -> Optional[str]:
+    def pick_file_native() -> str | None:
         try:
             import gi  # type: ignore
 
@@ -101,7 +100,7 @@ def input_file() -> CustomUpload:
                 None,
             )
 
-            filename: Optional[str] = None
+            filename: str | None = None
             loop = GLib.MainLoop()
 
             def on_response(_proxy, _sender, _signal, params):

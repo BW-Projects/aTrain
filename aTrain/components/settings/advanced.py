@@ -83,18 +83,12 @@ def input_temperature():
         ui.separator()
 
         with ui.row().classes("w-full gap-2 items-center"):
-            number = ui.number(
-                min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto"
-            )
+            number = ui.number(min=0.0, max=1.0, step=0.1, precision=1, placeholder="auto")
             number.props("filled bg-color=gray-100 color=dark").classes("flex-grow")
-            number.bind_value(
-                app.storage.general, "temperature_override"
-            )  # <- New state name
+            number.bind_value(app.storage.general, "temperature_override")  # <- New state name
 
             reset_btn = ui.button(icon="refresh", color="gray-300")
-            reset_btn.props("flat dense round size=sm").tooltip(
-                "Reset to default (auto)"
-            )
+            reset_btn.props("flat dense round size=sm").tooltip("Reset to default (auto)")
             reset_btn.on_click(lambda: number.set_value(None))
 
     # Fix wrong default setting from version 1.4.0, TODO: Revert state name to "temperature" in upcoming releases

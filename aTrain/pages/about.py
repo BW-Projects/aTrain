@@ -1,6 +1,5 @@
-from nicegui import ui
-
 from aTrain.layouts.base import base_layout
+from nicegui import ui
 
 AUTHORS = ["Armin Haberl", "Jürgen Fleiß", "Dominik Kowald", "Stefan Thalmann"]
 DEVELOPERS = ["Armin Haberl", "Jürgen Fleiß", "Andrea Forster (former)"]

@@ -1,19 +1,16 @@
 import os
 from importlib.resources import files
 from pathlib import Path
-from typing import cast
+from typing import Annotated, cast
 from unittest.mock import patch
 
 from aTrain_core.globals import ATRAIN_DIR, FLATPAK, REQUIRED_MODELS
 from aTrain_core.load_resources import get_model
 from platformdirs import user_config_path
 from typer import Option, Typer
-from typing_extensions import Annotated
 from wakepy import keep
 
-NICEGUI_STORAGE_PATH = (
-    user_config_path() / "aTrain" if FLATPAK else (ATRAIN_DIR / "settings")
-)
+NICEGUI_STORAGE_PATH = user_config_path() / "aTrain" if FLATPAK else (ATRAIN_DIR / "settings")
 
 with patch.dict(os.environ, NICEGUI_STORAGE_PATH=str(NICEGUI_STORAGE_PATH)):
     from nicegui import ui

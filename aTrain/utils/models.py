@@ -5,15 +5,14 @@ import urllib.request
 from concurrent.futures.process import BrokenProcessPool
 from multiprocessing import Manager
 
-from aTrain_core.settings import load_languages
+from aTrain.components.dialogs.download import close_dialog_download, dialog_download
+from aTrain.components.dialogs.error import dialog_error
 from aTrain_core.globals import MODELS_DIR, REQUIRED_MODELS_DIR
 from aTrain_core.load_resources import get_model, load_model_config_file, remove_model
+from aTrain_core.settings import load_languages
 from nicegui import run, ui
 from nicegui.run import SubprocessException
 from nicegui.run import setup as setup_process_pool
-
-from aTrain.components.dialogs.download import close_dialog_download, dialog_download
-from aTrain.components.dialogs.error import dialog_error
 
 
 def read_downloaded_models() -> list:
@@ -61,9 +60,7 @@ def read_model_metadata() -> list:
         }
         all_models_metadata.append(model_info)
 
-    all_models_metadata = sorted(
-        all_models_metadata, key=lambda x: x["downloaded"], reverse=True
-    )
+    all_models_metadata = sorted(all_models_metadata, key=lambda x: x["downloaded"], reverse=True)
 
     return all_models_metadata
 

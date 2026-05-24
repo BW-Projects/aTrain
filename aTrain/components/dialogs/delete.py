@@ -1,6 +1,5 @@
-from nicegui import ui
-
 from aTrain.utils.archive import delete_transcription as delete
+from nicegui import ui
 
 
 def dialog_delete():

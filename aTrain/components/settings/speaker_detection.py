@@ -1,4 +1,4 @@
-from nicegui import ui, app
+from nicegui import app, ui
 
 
 def input_speaker_detection():

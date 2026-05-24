@@ -4,16 +4,15 @@ from multiprocessing import Manager
 from pathlib import Path
 from typing import TypedDict, cast
 
+from aTrain.components.dialogs.error import dialog_error
+from aTrain.components.dialogs.finished import dialog_finished
+from aTrain.components.dialogs.process import close_dialog_process, dialog_process
+from aTrain.utils.archive import delete_transcription
 from aTrain_core.settings import ComputeType, Device, Settings, check_inputs_transcribe
 from nicegui import app, events, run, ui
 from nicegui.run import SubprocessException
 from nicegui.run import setup as setup_process_pool
 from starlette.formparsers import MultiPartParser
-
-from aTrain.components.dialogs.error import dialog_error
-from aTrain.components.dialogs.finished import dialog_finished
-from aTrain.components.dialogs.process import close_dialog_process, dialog_process
-from aTrain.utils.archive import delete_transcription
 
 MultiPartParser.spool_max_size = 1024 * 1024 * 1024 * 10  # 10 GB file size limit
 

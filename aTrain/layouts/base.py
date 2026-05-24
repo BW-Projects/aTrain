@@ -1,8 +1,9 @@
 from contextlib import contextmanager
-from nicegui import ui
-from aTrain.components.layout.header import header
+
 from aTrain.components.layout.footer import footer
+from aTrain.components.layout.header import header
 from aTrain.components.layout.sidebar import sidebar
+from nicegui import ui
 
 
 @contextmanager
