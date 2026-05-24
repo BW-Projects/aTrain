@@ -52,3 +52,8 @@ url = "https://download.pytorch.org/whl/cu128"
 torch       = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 torchaudio  = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
 torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'linux'" }]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.15.0",
+]

@@ -13,6 +13,22 @@ uv run aTrain start     # run the app
 If you do not have uv installed yet, see the
 [uv installation guide](https://docs.astral.sh/uv/#installation).
 
+## Running the CI checks locally
+
+The CI workflow runs `ruff` for linting and format checking. To
+reproduce the same checks locally before pushing:
+
+```bash
+uv sync --group dev             # install dev tools (ruff)
+uv run ruff check .             # lint
+uv run ruff format --check .    # format check (no rewrites)
+uv run ruff format .            # apply formatter
+```
+
+`uv sync --locked --group dev` is also used by CI to validate that
+`uv.lock` is in sync with `pyproject.toml`. Running `uv lock` locally
+after any dependency change keeps the lockfile current.
+
 # Branching
 
 As the project grows and community contributions become more frequent (thanks all!) we opted to adopt a branching model with the intention to make it easier and clearer for contributors to make pull requests.

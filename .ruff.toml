@@ -1,0 +1,56 @@
+# Ruff configuration
+
+target-version = "py311"
+line-length = 100
+src = ["aTrain"]
+extend-exclude = [
+  ".venv",
+  "build",
+  "dist",
+  "aTrain.egg-info",
+  "aTrain/required_models",
+]
+
+[lint]
+select = [
+  "E", "F", "W",  # pycodestyle / pyflakes
+  "I",            # isort
+  "B",            # bugbear
+  "UP",           # pyupgrade
+  "SIM",          # simplify
+  "RUF",          # ruff-specific
+  "S",            # bandit-style security checks
+  "RET",          # return-statement quality
+  "C4",           # comprehensions
+  "A",            # builtin shadowing
+  "N",            # naming
+]
+ignore = [
+  "E501",   # line length is the formatter's job, not the linter's
+  "S603",   # subprocess: aTrain calls xdg-open with a static argv, not a shell
+  "RET504", # named intermediate variables serve as in-line documentation
+  "SIM105", # try/except <exc>: pass is idiomatic, contextlib.suppress is a style preference (not a safety win)
+]
+
+[lint.per-file-ignores]
+"aTrain/__init__.py"        = ["N999"]   # project name aTrain intentionally capitalised
+"aTrain/__main__.py"        = ["N999"]   # project name aTrain intentionally capitalised
+"aTrain/pages/**/*.py"      = ["SIM117"] # NiceGUI: nested `with` reflects the UI tree
+"aTrain/components/**/*.py" = ["SIM117"] # NiceGUI: nested `with` reflects the UI tree
+
+# --- Grandfathered findings that need a manual (non-auto-fixable) code
+# change. Deferred to small, focused follow-up PRs so the behaviour change
+# is reviewable alongside test coverage (per review on #160). Each entry
+# is removed in the PR that applies the corresponding fix.
+"aTrain/components/settings/advanced.py"          = ["A002"]   # `open` param shadows builtin
+"aTrain/components/settings/model.py"             = ["A001"]   # `input` var shadows builtin
+"aTrain/components/settings/speaker_count.py"     = ["A001"]   # `input` var shadows builtin
+"aTrain/components/settings/speaker_detection.py" = ["A001"]   # `input` var shadows builtin
+"aTrain/components/settings/language.py"          = ["RUF015"] # list(d.keys())[0] -> next(iter(d))
+"aTrain/components/splash_screen.py"              = ["SIM118"] # `in d.keys()` -> `in d`
+"aTrain/utils/models.py"                          = ["B904", "SIM118"]  # raise ... from; in d.keys()
+"aTrain/utils/archive.py"                         = ["S607"]   # partial exe path for xdg-open
+
+[format]
+quote-style = "double"
+indent-style = "space"
