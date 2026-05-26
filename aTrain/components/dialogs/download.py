@@ -4,10 +4,9 @@ from multiprocessing.managers import DictProxy
 from pathlib import Path
 from typing import cast
 
+from aTrain.components.dialogs.process import update_time
 from nicegui import ElementFilter, app, ui
 from nicegui.run import tear_down as stop_download
-
-from aTrain.components.dialogs.process import update_time
 
 GIF_DOWNLOAD = cast(Path, files("aTrain") / "static" / "images" / "download.gif")
 

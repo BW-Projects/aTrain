@@ -1,6 +1,5 @@
-from nicegui import ElementFilter, app, ui
-
 from aTrain.utils.models import model_languages
+from nicegui import ElementFilter, app, ui
 
 
 def input_language():

@@ -1,8 +1,7 @@
-from aTrain_core.globals import REQUIRED_MODELS
-from nicegui import ui
-
 from aTrain.layouts.base import base_layout
 from aTrain.utils.models import download_model, read_model_metadata, remove_model
+from aTrain_core.globals import REQUIRED_MODELS
+from nicegui import ui
 
 
 @ui.page("/models")
@@ -39,6 +38,4 @@ def page():
                             else:
                                 btn_download = ui.button("Download", color="dark")
                                 btn_download.props("no-caps size=0.7rem unelevated")
-                                btn_download.on_click(
-                                    lambda m=model: download_model(m["model"])
-                                )
+                                btn_download.on_click(lambda m=model: download_model(m["model"]))

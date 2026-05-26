@@ -1,9 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from aTrain_core.globals import FLATPAK
-from nicegui import Client, ui
-
 from aTrain.components.settings.advanced import advanced_settings
 from aTrain.components.settings.file import input_file
 from aTrain.components.settings.language import input_language
@@ -13,6 +10,8 @@ from aTrain.components.settings.speaker_detection import input_speaker_detection
 from aTrain.components.splash_screen import splash_screen
 from aTrain.layouts.base import base_layout
 from aTrain.utils.transcription import start_transcription
+from aTrain_core.globals import FLATPAK
+from nicegui import Client, ui
 
 
 @ui.page("/")
@@ -44,9 +43,7 @@ async def page(client: Client):
                     )
                     await start_transcription(payload)
 
-                start_btn = ui.button(
-                    "Start", on_click=start_from_selected, color="dark"
-                )
+                start_btn = ui.button("Start", on_click=start_from_selected, color="dark")
             else:
                 start_btn = ui.button("Start", on_click=file.upload, color="dark")
             start_btn.props("no-caps unelevated")

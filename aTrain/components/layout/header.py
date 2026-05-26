@@ -2,9 +2,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import cast
 
-from nicegui import ui
-
 from aTrain.version import __version__
+from nicegui import ui
 
 ATRAIN_LOGO = cast(Path, files("aTrain") / "static" / "images" / "logo.svg")
 GITHUB_LOGO = cast(Path, files("aTrain") / "static" / "images" / "github.svg")

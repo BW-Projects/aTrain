@@ -2,9 +2,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import cast
 
-from nicegui import app, ui
-
 from aTrain.utils.archive import open_file_directory
+from nicegui import app, ui
 
 GIF_FINISHED = cast(Path, files("aTrain") / "static" / "images" / "success.gif")
 
@@ -19,9 +18,7 @@ def dialog_finished(file_id: str):
         ui.image(GIF_FINISHED).classes("w-1/2 h-1/2 mx-auto")
         ui.separator()
         with ui.row().classes("justify-between w-full items-center"):
-            ui.label("").bind_text_from(
-                state, "time", lambda x: f"We transcribed your file in {x}"
-            )
+            ui.label("").bind_text_from(state, "time", lambda x: f"We transcribed your file in {x}")
             with ui.row():
                 btn_open = ui.button("Open", color="gray-200")
                 btn_open.props("unelevated no-caps text-color=dark")
