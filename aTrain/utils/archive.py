@@ -1,6 +1,6 @@
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404 — used only with a static argv, never a shell
 import sys
 from importlib.resources import files
 
@@ -71,7 +71,7 @@ def open_file_directory(file_id) -> None:
     directory = os.path.join(TRANSCRIPT_DIR, file_id)
     if os.path.exists(directory):
         if sys.platform.startswith("linux"):
-            subprocess.run(["xdg-open", directory], check=False)
+            subprocess.run(["xdg-open", directory], check=False)  # nosec B603 B607 — fixed argv, no shell, no user input
         else:
             show_in_file_manager(directory)
 

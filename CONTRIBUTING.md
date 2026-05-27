@@ -15,14 +15,15 @@ If you do not have uv installed yet, see the
 
 ## Running the CI checks locally
 
-The CI workflow runs `ruff` for linting and format checking. To
-reproduce the same checks locally before pushing:
+The CI workflow runs `ruff` (lint + format) and `bandit` (security
+scan). To reproduce the same checks locally before pushing:
 
 ```bash
-uv sync --group dev             # install dev tools (ruff)
-uv run ruff check .             # lint
-uv run ruff format --check .    # format check (no rewrites)
-uv run ruff format .            # apply formatter
+uv sync --group dev                        # install dev tools
+uv run ruff check .                        # lint
+uv run ruff format --check .               # format check (no rewrites)
+uv run ruff format .                       # apply formatter
+uv run bandit -r aTrain -c pyproject.toml  # security scan
 ```
 
 `uv sync --locked --group dev` is also used by CI to validate that
