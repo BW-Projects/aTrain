@@ -41,3 +41,25 @@ jobs:
 
       - name: Ruff format check
         run: uv run --no-sync ruff format --check .
+
+  security:
+    name: bandit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install bandit
+        # bandit scans source only, so the app runtime isn't needed.
+        run: uv sync --locked --only-group dev --no-install-project
+
+      - name: Bandit security scan
+        run: uv run --no-sync bandit -r aTrain -c pyproject.toml

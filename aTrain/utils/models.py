@@ -105,7 +105,7 @@ async def download_model(model: str):
 def check_internet() -> None:
     """A function to check whether the user is connected to the internet."""
     try:
-        urllib.request.urlopen("https://huggingface.co", timeout=10)
+        urllib.request.urlopen("https://huggingface.co", timeout=10)  # nosec B310 — hardcoded https URL, not user input
     except urllib.error.URLError:
         raise ConnectionError(
             "We cannot reach Hugging Face. Most likely you are not connected to the internet."
