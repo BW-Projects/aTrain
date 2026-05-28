@@ -63,3 +63,36 @@ jobs:
 
       - name: Bandit security scan
         run: uv run --no-sync bandit -r aTrain -c pyproject.toml
+
+  dependencies:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install pip-audit
+        run: uv sync --locked --only-group dev --no-install-project
+
+      - name: Audit locked dependencies for known CVEs
+        # Non-gating for now: nicegui 2.21.1 / werkzeug 3.0.3 carry known CVEs
+        # pending the coordinated upgrade in #159. Flip to gating once that
+        # lands. The findings still print on every run for visibility.
+        continue-on-error: true
+        # Export the lock as a PEP 751 pylock.toml and audit it via --locked.
+        # pip-audit checks each pinned package against the PyPI advisory DB and
+        # self-documents anything it can't audit (the git aTrain_core dep, the
+        # +cuXXX torch builds from the PyTorch index) in a "Skip Reason" table —
+        # no manual filtering, no app-runtime build.
+        run: |
+          mkdir -p /tmp/audit
+          uv export --format pylock.toml -o /tmp/audit/pylock.toml
+          uv run --no-sync pip-audit /tmp/audit --locked
