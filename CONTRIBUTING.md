@@ -15,8 +15,9 @@ If you do not have uv installed yet, see the
 
 ## Running the CI checks locally
 
-The CI workflow runs `ruff` (lint + format) and `bandit` (security
-scan). To reproduce the same checks locally before pushing:
+The CI workflow runs `ruff` (lint + format), `bandit` (security scan),
+and `pip-audit` (known-CVE scan). To reproduce the same checks locally
+before pushing:
 
 ```bash
 uv sync --group dev                        # install dev tools
@@ -24,6 +25,11 @@ uv run ruff check .                        # lint
 uv run ruff format --check .               # format check (no rewrites)
 uv run ruff format .                       # apply formatter
 uv run bandit -r aTrain -c pyproject.toml  # security scan
+
+# known-CVE scan of the locked dependency graph (same as CI):
+uv export --format requirements-txt --no-emit-project --no-hashes \
+  | grep -vE '@ git\+|\+cu[0-9]' > /tmp/audit-requirements.txt
+uv run pip-audit -r /tmp/audit-requirements.txt --no-deps
 ```
 
 `uv sync --locked --group dev` is also used by CI to validate that
