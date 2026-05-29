@@ -96,3 +96,75 @@ jobs:
           mkdir -p /tmp/audit
           uv export --format pylock.toml -o /tmp/audit/pylock.toml
           uv run --no-sync pip-audit /tmp/audit --locked
+
+  e2e:
+    name: e2e (core pipeline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install aTrain_core (CPU torch) + pytest
+        # Smoke-tests the transcription engine only, so we install aTrain_core
+        # standalone against the PyTorch CPU index — no cu128/GTK app runtime
+        # (~1.5 GB vs ~7.5 GB). aTrain_core's torch pin is index-agnostic, so
+        # the CPU index resolves torch==2.9.1+cpu cleanly. Off-lock by design
+        # (aTrain_core has no lock); pin a SHA here if reproducibility is needed.
+        run: |
+          uv venv
+          uv pip install \
+            "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain_core.git@develop" \
+            "torch==2.9.1+cpu" "torchaudio==2.9.1+cpu" pytest pytest-asyncio \
+            --extra-index-url https://download.pytorch.org/whl/cpu \
+            --index-strategy unsafe-best-match
+
+      - name: Run transcription E2E smoke test
+        run: .venv/bin/python -m pytest tests/core -v
+
+  e2e-app:
+    name: e2e (app, full stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install GTK build deps for pywebview[GTK]
+        # The full app pulls pywebview[GTK] on Linux, which builds pycairo /
+        # pygobject against these system libs.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libgirepository1.0-dev
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the full app runtime (cu128) + pytest
+        # The UI boot test needs the real `aTrain` CLI, so this installs the
+        # locked cu128/GTK stack — which also validates that the shipped
+        # dependency set installs and imports. On a GPU-less runner the cu128
+        # torch build simply runs on CPU. pytest is not an app dependency, so
+        # it is added after the locked sync.
+        run: |
+          uv sync --locked
+          uv pip install pytest pytest-asyncio
+
+      - name: Run E2E tests against the shipped stack (boot + transcribe)
+        # Runs both suites on the locked cu128 stack: the UI boot smoke test
+        # (tests/ui) and the transcription E2E (tests/core), so the shipped
+        # dependency set is exercised end-to-end (boots AND transcribes), not
+        # just installed. `uv run` puts .venv/bin on PATH for the `aTrain`
+        # subprocess; --no-sync keeps the just-installed pytest in place.
+        run: uv run --no-sync pytest tests/core tests/ui -v
