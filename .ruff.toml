@@ -50,6 +50,7 @@ ignore = [
 "aTrain/components/splash_screen.py"              = ["SIM118"] # `in d.keys()` -> `in d`
 "aTrain/utils/models.py"                          = ["B904", "SIM118"]  # raise ... from; in d.keys()
 "aTrain/utils/archive.py"                         = ["S607"]   # partial exe path for xdg-open
+"tests/**"                                        = ["S101"]   # pytest relies on the `assert` statement
 
 [format]
 quote-style = "double"
