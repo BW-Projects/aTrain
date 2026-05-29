@@ -37,6 +37,7 @@ ignore = [
 "aTrain/__main__.py"        = ["N999"]   # project name aTrain intentionally capitalised
 "aTrain/pages/**/*.py"      = ["SIM117"] # NiceGUI: nested `with` reflects the UI tree
 "aTrain/components/**/*.py" = ["SIM117"] # NiceGUI: nested `with` reflects the UI tree
+"tests/**"                  = ["S101", "S607"]   # pytest asserts; tests invoke aTrain/aTrain_core by name
 
 # --- Grandfathered findings that need a manual (non-auto-fixable) code
 # change. Deferred to small, focused follow-up PRs so the behaviour change
