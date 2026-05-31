@@ -64,3 +64,6 @@ dev = [
 # Only the aTrain package is scanned (CI runs `bandit -r aTrain`); these
 # excludes keep ad-hoc local runs from descending into build/venv/model dirs.
 exclude_dirs = [".venv", "build", "dist", "aTrain.egg-info", "aTrain/required_models"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

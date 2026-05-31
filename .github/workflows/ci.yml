@@ -96,3 +96,33 @@ jobs:
           mkdir -p /tmp/audit
           uv export --format pylock.toml -o /tmp/audit/pylock.toml
           uv run --no-sync pip-audit /tmp/audit --locked
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install unit-test deps (no torch, no GTK)
+        # The unit tests cover only torch- and NiceGUI-free helpers
+        # (aTrain/utils/archive.py), so we skip the heavy app runtime entirely.
+        # aTrain_core is installed with --no-deps (we need only
+        # aTrain_core.globals, which imports just platformdirs), plus the few
+        # light libraries archive.py imports, plus pytest. Stays in seconds.
+        run: |
+          uv venv
+          uv pip install --no-deps \
+            "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain_core.git@develop"
+          uv pip install platformdirs pyyaml show-in-file-manager pytest
+
+      - name: Run unit tests
+        run: .venv/bin/python -m pytest tests/unit -v
