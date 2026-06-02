@@ -170,9 +170,13 @@ jobs:
         run: uv run --no-sync pytest tests/core tests/ui -v
 
   unit:
-    name: unit
-    runs-on: ubuntu-latest
+    name: unit (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -190,6 +194,9 @@ jobs:
         # aTrain_core is installed with --no-deps (we need only
         # aTrain_core.globals, which imports just platformdirs), plus the few
         # light libraries archive.py imports, plus pytest. Stays in seconds.
+        # `shell: bash` so the `\` line-continuations work on windows-latest too
+        # (default Windows shell is pwsh, which uses backtick instead).
+        shell: bash
         run: |
           uv venv
           uv pip install --no-deps \
@@ -197,4 +204,6 @@ jobs:
           uv pip install platformdirs pyyaml show-in-file-manager pytest
 
       - name: Run unit tests
-        run: .venv/bin/python -m pytest tests/unit -v
+        # `uv run --no-sync` finds the venv we just built and invokes pytest
+        # cross-platform (no `.venv/bin` vs `.venv/Scripts` split).
+        run: uv run --no-sync pytest tests/unit -v
