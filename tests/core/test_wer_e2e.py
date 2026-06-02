@@ -101,4 +101,11 @@ def test_transcription_accuracy_wer(atrain_env):
         hypothesis_transform=WER_TRANSFORM,
     )
     # Treshold at 5%, as large-v3-turbo resulted in 4.8% WER on real world test data. Change if too low.
-    assert wer < 0.05, f"WER too high: {wer:.2%}"
+    # DIAGNOSTIC ONLY: dump head + tail of hypothesis on failure (revert before merging anywhere).
+    msg = (
+        f"WER too high: {wer:.2%}\n"
+        f"hyp #words: {len(hypothesis.split())}, #chars: {len(hypothesis)}\n"
+        f"--- HEAD (first 600 chars) ---\n{hypothesis[:600]}\n"
+        f"--- TAIL (last 2000 chars) ---\n{hypothesis[-2000:]}"
+    )
+    assert wer < 0.05, msg
