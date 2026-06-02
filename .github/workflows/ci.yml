@@ -204,6 +204,9 @@ jobs:
           uv pip install platformdirs pyyaml show-in-file-manager pytest
 
       - name: Run unit tests
-        # `uv run --no-sync` finds the venv we just built and invokes pytest
-        # cross-platform (no `.venv/bin` vs `.venv/Scripts` split).
-        run: uv run --no-sync pytest tests/unit -v
+        # `uv run --no-sync` finds the venv we just built and invokes python
+        # cross-platform (no `.venv/bin` vs `.venv/Scripts` split). `python -m
+        # pytest` (rather than bare `pytest`) is required so cwd is added to
+        # sys.path — the tests import `aTrain` from the repo root, which is
+        # not installed as a package in this job.
+        run: uv run --no-sync python -m pytest tests/unit -v
