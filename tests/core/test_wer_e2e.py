@@ -68,12 +68,6 @@ def _transcribe(env, data_dir, label, fixture_path, *extra_args):
             "cpu",
             "--language",
             "auto-detect",
-            # Greedy decoding (temperature 0) so the result is deterministic. The
-            # default temperature fallback ([0.0..1.0]) samples non-deterministically
-            # on low-confidence trailing audio, producing run-to-run hallucinations
-            # that make a fixed WER threshold flaky.
-            "--temperature",
-            "0.0",
             *extra_args,
         ],
         env,
