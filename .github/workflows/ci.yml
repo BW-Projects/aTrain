@@ -168,3 +168,45 @@ jobs:
         # just installed. `uv run` puts .venv/bin on PATH for the `aTrain`
         # subprocess; --no-sync keeps the just-installed pytest in place.
         run: uv run --no-sync pytest tests/core tests/ui -v
+
+  unit:
+    name: unit (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install unit-test deps (no torch, no GTK)
+        # The unit tests cover only torch- and NiceGUI-free helpers
+        # (aTrain/utils/archive.py), so we skip the heavy app runtime entirely.
+        # aTrain_core is installed with --no-deps (we need only
+        # aTrain_core.globals, which imports just platformdirs), plus the few
+        # light libraries archive.py imports, plus pytest. Stays in seconds.
+        # `shell: bash` so the `\` line-continuations work on windows-latest too
+        # (default Windows shell is pwsh, which uses backtick instead).
+        shell: bash
+        run: |
+          uv venv
+          uv pip install --no-deps \
+            "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain_core.git@develop"
+          uv pip install platformdirs pyyaml show-in-file-manager pytest
+
+      - name: Run unit tests
+        # `uv run --no-sync` finds the venv we just built and invokes python
+        # cross-platform (no `.venv/bin` vs `.venv/Scripts` split). `python -m
+        # pytest` (rather than bare `pytest`) is required so cwd is added to
+        # sys.path — the tests import `aTrain` from the repo root, which is
+        # not installed as a package in this job.
+        run: uv run --no-sync python -m pytest tests/unit -v
