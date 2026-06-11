@@ -76,11 +76,11 @@ def open_file_directory(file_id) -> None:
             show_in_file_manager(directory)
 
 
-def load_faqs() -> dict:
+def load_faqs() -> list[dict]:
     """A function that reads the content of the faq file."""
     faq_path = str(files("aTrain.static").joinpath("faq.yaml"))
     with open(faq_path, encoding="utf-8") as faq_file:
-        faqs: dict = yaml.safe_load(faq_file)
+        faqs: list[dict] = yaml.safe_load(faq_file)
     return faqs
 
 
