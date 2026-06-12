@@ -68,50 +68,6 @@ uv run pip-audit /tmp/audit --locked
 `uv.lock` is in sync with `pyproject.toml`. Running `uv lock` locally
 after any dependency change keeps the lockfile current.
 
-## Running the tests locally
-
-The test suite lives under `tests/` and is split into three suites with
-different runtime needs. `pytest` is intentionally **not** part of the
-`dev` dependency group, i.e. each suite installs only what it needs, the
-same way CI does. Pick the suite that matches your change.
-
-```bash
-# Unit tests — torch- and NiceGUI-free helpers (aTrain/utils/archive.py).
-# Fast, no app runtime. Runs on Linux and Windows in CI.
-uv venv
-uv pip install --no-deps \
-  "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain_core.git@develop"
-uv pip install platformdirs pyyaml show-in-file-manager pytest
-uv run --no-sync python -m pytest tests/unit -v
-```
-
-```bash
-# Core E2E — transcription engine smoke test (tests/core), CPU torch only.
-uv venv
-uv pip install \
-  "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain_core.git@develop" \
-  "torch==2.9.1+cpu" "torchaudio==2.9.1+cpu" pytest pytest-asyncio \
-  --extra-index-url https://download.pytorch.org/whl/cpu \
-  --index-strategy unsafe-best-match
-.venv/bin/python -m pytest tests/core -v
-```
-
-```bash
-# App E2E — UI boot + click-through against the full shipped stack
-# (tests/ui). Needs the locked app runtime. These tests run NiceGUI in
-# browser mode (`--no-native`) via the in-process `user` fixture, so the
-# native pywebview[GTK] backend is NOT required — a plain locked sync is enough.
-uv sync --locked
-uv pip install pytest pytest-asyncio
-uv run --no-sync pytest tests/ui -v
-```
-
-The authoritative setup for every suite is the CI workflow at
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml); the commands above
-mirror it. `tool.pytest.ini_options` in `pyproject.toml` sets
-`testpaths = ["tests"]` and `asyncio_mode = "auto"`, so the async UI
-fixtures need no per-test markers.
-
 # Branching
 
 As the project grows and community contributions become more frequent (thanks all!) we opted to adopt a branching model with the intention to make it easier and clearer for contributors to make pull requests.
