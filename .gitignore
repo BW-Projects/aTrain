@@ -9,6 +9,7 @@ test.py
 aTrain/required_models/*
 .DS_Store
 .cache
+.pytest_cache
 .devcontainer/
 docker-compose.override.yml
 .env
