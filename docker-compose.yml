@@ -1,0 +1,32 @@
+services:
+  atrain:
+    # Force x86_64: the locked dependency graph (torch+cu128, torchcodec,
+    # pyannote.audio) ships x86_64-only wheels. On an ARM host (e.g. Apple
+    # Silicon / OrbStack) Docker runs this under emulation so a plain
+    # `uv sync` resolves exactly as it does in CI. Without this pin the build
+    # defaults to the host arch (aarch64), where torchcodec has no wheel and
+    # the develop-branch app fails to import pyannote.audio at startup.
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      # Bind mount: live source code editing from host
+      - .:/workspace
+      # Named volume: persists downloaded models and transcription output
+      # Maps to ATRAIN_DIR which aTrain_core resolves to ~/.local/share/aTrain
+      - atrain_data:/root/.local/share/aTrain
+    environment:
+      # Prevents Python from buffering stdout/stderr (cleaner container logs)
+      - PYTHONUNBUFFERED=1
+      # Prepend bind-mounted source so live edits take effect without reinstalling
+      - PYTHONPATH=/workspace
+      # Wakepy tries to prevent system sleep — not applicable in a headless container.
+      # This env var tells wakepy to silently succeed without touching the system.
+      - WAKEPY_FAKE_SUCCESS=1
+    restart: unless-stopped
+
+volumes:
+  atrain_data:
