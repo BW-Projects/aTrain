@@ -92,5 +92,6 @@ EXPOSE 8080
 
 # Run in browser mode (no pywebview native window), with hot-reload.
 # The source directory is bind-mounted by docker-compose, so edits on the
-# host are reflected immediately inside the container.
-CMD ["aTrain", "start", "--no-native"]
+# host are reflected immediately inside the container; --reload restarts the
+# NiceGUI server on file change so contributors don't need a manual restart.
+CMD ["aTrain", "start", "--no-native", "--reload"]
