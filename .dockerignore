@@ -26,3 +26,7 @@ env/
 # Sample data and docs (not needed in the image)
 sample_data/
 docs/
+
+# Dev-container runtime output (models + transcriptions); bind-mounted at
+# runtime, must not enter the build context.
+data/
