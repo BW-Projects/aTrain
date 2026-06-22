@@ -56,6 +56,7 @@ include = ["aTrain*"]
 
 [project.scripts]
 aTrain = "aTrain.app:cli"
+aTrain_core = "aTrain_core.cli:cli"
 
 [tool.setuptools.dynamic]
 version = { attr = "aTrain.version.__version__" }
