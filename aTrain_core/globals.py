@@ -30,9 +30,7 @@ MODELS_DIR = (user_data_path() / "models") if FLATPAK else (ATRAIN_DIR / "models
 if FLATPAK:
     flatpak_required_models_dir = Path("/app/share/atrain-required-models")
     REQUIRED_MODELS_DIR = (
-        flatpak_required_models_dir
-        if flatpak_required_models_dir.is_dir()
-        else MODELS_DIR
+        flatpak_required_models_dir if flatpak_required_models_dir.is_dir() else MODELS_DIR
     )
 elif find_spec("aTrain"):
     REQUIRED_MODELS_DIR = cast(Path, files("aTrain") / "required_models")
