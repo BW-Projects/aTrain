@@ -1,7 +1,7 @@
 from pathlib import Path
+from typing import Annotated
 
 from typer import Argument, Option, Typer
-from typing_extensions import Annotated
 
 from aTrain_core.globals import DEFAULT_CPU_THREADS, MAX_CPU_THREADS
 from aTrain_core.load_resources import (
@@ -46,9 +46,7 @@ def transcribe(
     speaker_count: Annotated[int, Option(help=SPEAKER_HELP)] = 0,
     device: Annotated[Device, Option(help=DEVICE_HELP)] = Device.CPU,
     compute_type: Annotated[ComputeType, Option(help=COMPUTE_HELP)] = ComputeType.INT8,
-    temperature: Annotated[
-        float | None, Option(help=TEMP_HELP, min=0.0, max=1.0)
-    ] = None,
+    temperature: Annotated[float | None, Option(help=TEMP_HELP, min=0.0, max=1.0)] = None,
     cpu_threads: Annotated[
         int, Option(help=CPU_THREADS_HELP, min=0, max=MAX_CPU_THREADS)
     ] = DEFAULT_CPU_THREADS,

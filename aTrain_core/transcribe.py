@@ -85,9 +85,7 @@ def transcribe(settings: Settings):
         write_logfile("Transcribing in same process", settings.file_id)
         transcript = run_transcription(settings, model_path, audio_array)
     if settings.speaker_detection and transcript:
-        transcript = run_speaker_detection(
-            settings, audio_duration, audio_array, transcript
-        )
+        transcript = run_speaker_detection(settings, audio_duration, audio_array, transcript)
     create_output_files(transcript, settings.speaker_detection, settings.file_id)
     write_logfile("No speaker detection. Created output files", settings.file_id)
     add_processing_time_to_metadata(settings.file_id)
@@ -148,14 +146,14 @@ def run_transcription(
         write_logfile("Transcription successful", settings.file_id)
         if settings.device == Device.CPU:
             return transcript
-        elif settings.device == Device.GPU:
+        if settings.device == Device.GPU:
             returnDict["transcript"] = transcript
             os._exit(0)
 
     except Exception as error:
         if settings.device == Device.CPU:
             raise error
-        elif settings.device == Device.GPU:
+        if settings.device == Device.GPU:
             returnDict["error"] = error
 
 
@@ -212,9 +210,8 @@ def run_transcription_in_process(
         if "error" in returnDict.keys():
             error: Exception = returnDict["error"]
             raise error
-        else:
-            transcript = returnDict["transcript"]
-            return transcript
+        transcript = returnDict["transcript"]
+        return transcript
 
 
 def run_speaker_detection(
@@ -238,9 +235,7 @@ def run_speaker_detection(
         pipeline.to(torch.device("cuda"))
 
     with CustomProgressHook(settings.progress) as hook:
-        output: DiarizeOutput = pipeline(
-            audio, num_speakers=settings.speaker_count, hook=hook
-        )
+        output: DiarizeOutput = pipeline(audio, num_speakers=settings.speaker_count, hook=hook)
     segments = output.speaker_diarization
     speaker_results = transform_speakers_results(segments)
     write_logfile("Transformed diarization segments", settings.file_id)

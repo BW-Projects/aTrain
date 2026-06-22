@@ -29,9 +29,7 @@ def download_all_models():
         get_model(model)
 
 
-def download_model(
-    model_path: Path, model_info: dict, progress: DictProxy | None = None
-):
+def download_model(model_path: Path, model_info: dict, progress: DictProxy | None = None):
     if progress:
         # Monkey patching custom tqdm bar into the huggingface snapshot download
         repo_size = model_info["repo_size"]
@@ -68,7 +66,7 @@ def remove_model(model: str, models_dir: Path = MODELS_DIR):
 def load_model_config_file() -> dict:
     """Loads the model configuration file."""
     models_config_path = str(files("aTrain_core.data").joinpath("models.json"))
-    with open(models_config_path, "r") as models_config_file:
+    with open(models_config_path) as models_config_file:
         models_config: dict = json.load(models_config_file)
     return models_config
 

@@ -35,9 +35,7 @@ def create_file_id(file_path, timestamp):
     timestamp = timestamp[:-2]
     timestamp = timestamp[2:]
 
-    short_base_name = (
-        file_base_name[0:7] if len(file_base_name) >= 5 else file_base_name
-    )
+    short_base_name = file_base_name[0:7] if len(file_base_name) >= 5 else file_base_name
     file_id = timestamp + "-" + short_base_name
     return file_id
 
@@ -45,9 +43,15 @@ def create_file_id(file_path, timestamp):
 def create_output_files(result, speaker_detection, file_id):
     """Creates output files based on the transcription result."""
     create_json_file(result, file_id)
-    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=False, brackets=True)
-    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=True)
-    create_txt_file(result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=False)  # NEW: NVivo output format
+    create_txt_file(
+        result, file_id, speaker_detection, maxqda=False, timestamps=False, brackets=True
+    )
+    create_txt_file(
+        result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=True
+    )
+    create_txt_file(
+        result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=False
+    )  # NEW: NVivo output format
     create_txt_file(result, file_id, speaker_detection, maxqda=True, timestamps=True, brackets=True)
     create_srt_file(result, file_id)
 
@@ -81,9 +85,7 @@ def create_txt_file(result, file_id, speaker_detection, timestamps, maxqda, brac
         file.write(headline)
         current_speaker = None
         for segment in segments:
-            speaker = (
-                segment["speaker"] if "speaker" in segment else "Speaker undefined"
-            )
+            speaker = segment["speaker"] if "speaker" in segment else "Speaker undefined"
             if speaker != current_speaker and speaker_detection:
                 file.write(("\n\n" if maxqda else "\n") + speaker + "\n")
                 current_speaker = speaker
@@ -130,20 +132,17 @@ def named_tuple_to_dict(obj):
     """Converts named tuple to dictionary."""
     if isinstance(obj, dict):
         return {key: named_tuple_to_dict(value) for key, value in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [named_tuple_to_dict(value) for value in obj]
-    elif is_dataclass(obj):
+    if is_dataclass(obj):
         return {key: named_tuple_to_dict(value) for key, value in asdict(obj).items()}
-    elif isnamedtupleinstance(obj):
+    if isnamedtupleinstance(obj) or (hasattr(obj, "_asdict") and callable(obj._asdict)):
         return {key: named_tuple_to_dict(value) for key, value in obj._asdict().items()}
-    elif hasattr(obj, "_asdict") and callable(obj._asdict):
-        return {key: named_tuple_to_dict(value) for key, value in obj._asdict().items()}
-    elif hasattr(obj, "__dict__"):
+    if hasattr(obj, "__dict__"):
         return {key: named_tuple_to_dict(value) for key, value in vars(obj).items()}
-    elif isinstance(obj, tuple):
+    if isinstance(obj, tuple):
         return tuple(named_tuple_to_dict(value) for value in obj)
-    else:
-        return obj
+    return obj
 
 
 def isnamedtupleinstance(x):
@@ -161,9 +160,7 @@ def isnamedtupleinstance(x):
 def create_metadata(settings: Settings, audio_duration: int):
     """Creates metadata file for the transcription."""
 
-    metadata_file_path = os.path.join(
-        TRANSCRIPT_DIR, settings.file_id, METADATA_FILENAME
-    )
+    metadata_file_path = os.path.join(TRANSCRIPT_DIR, settings.file_id, METADATA_FILENAME)
     metadata = {
         "file_id": settings.file_id,
         "filename": settings.file_name,
@@ -194,7 +191,7 @@ def add_processing_time_to_metadata(file_id):
     """Adds processing time information to metadata."""
 
     metadata_file_path = os.path.join(TRANSCRIPT_DIR, file_id, METADATA_FILENAME)
-    with open(metadata_file_path, "r", encoding="utf-8") as metadata_file:
+    with open(metadata_file_path, encoding="utf-8") as metadata_file:
         metadata = yaml.safe_load(metadata_file)
     timestamp = metadata["timestamp"]
     start_time = datetime.strptime(timestamp, TIMESTAMP_FORMAT)
@@ -222,17 +219,13 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
     """
     transcript_segments = transcript_result["segments"]
     for seg in transcript_segments:
-        diarize_df["intersection"] = np.minimum(
-            diarize_df["end"], seg["end"]
-        ) - np.maximum(diarize_df["start"], seg["start"])
+        diarize_df["intersection"] = np.minimum(diarize_df["end"], seg["end"]) - np.maximum(
+            diarize_df["start"], seg["start"]
+        )
         diarize_df["union"] = np.maximum(diarize_df["end"], seg["end"]) - np.minimum(
             diarize_df["start"], seg["start"]
         )
-        dia_tmp = (
-            diarize_df[diarize_df["intersection"] > 0]
-            if not fill_nearest
-            else diarize_df
-        )
+        dia_tmp = diarize_df[diarize_df["intersection"] > 0] if not fill_nearest else diarize_df
         if len(dia_tmp) > 0:
             speaker = (
                 dia_tmp.groupby("speaker")["intersection"]
@@ -247,9 +240,9 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
                     diarize_df["intersection"] = np.minimum(
                         diarize_df["end"], word["end"]
                     ) - np.maximum(diarize_df["start"], word["start"])
-                    diarize_df["union"] = np.maximum(
-                        diarize_df["end"], word["end"]
-                    ) - np.minimum(diarize_df["start"], word["start"])
+                    diarize_df["union"] = np.maximum(diarize_df["end"], word["end"]) - np.minimum(
+                        diarize_df["start"], word["start"]
+                    )
                     dia_tmp = (
                         diarize_df[diarize_df["intersection"] > 0]
                         if not fill_nearest

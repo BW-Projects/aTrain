@@ -52,7 +52,7 @@ def check_inputs_transcribe(file, model, language, device):
 
 def load_formats() -> list:
     formats_json_path = str(files("aTrain_core.data").joinpath("formats.json"))
-    with open(formats_json_path, "r") as f:
+    with open(formats_json_path) as f:
         file_formats: list = json.load(f)
     return file_formats
 
@@ -72,8 +72,7 @@ def check_device(device):
         cuda_available = cuda.is_available()
         if cuda_available:
             return device
-        else:
-            raise ValueError("GPU is not available. Please choose CPU instead.")
+        raise ValueError("GPU is not available. Please choose CPU instead.")
 
 
 def check_model(model, language):
@@ -93,7 +92,7 @@ def check_model(model, language):
 
     model_config: dict = all_model_configs[model]
 
-    if "languages" in model_config.keys():
+    if "languages" in model_config:
         model_languages: list = model_config["languages"]
     else:
         model_languages = load_languages().keys()
@@ -108,7 +107,7 @@ def check_model(model, language):
 
 def load_languages() -> dict:
     languages_json_path = str(files("aTrain_core.data").joinpath("languages.json"))
-    with open(languages_json_path, "r") as f:
+    with open(languages_json_path) as f:
         languages = json.load(f)
     return languages
 
