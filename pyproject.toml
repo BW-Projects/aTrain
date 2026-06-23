@@ -67,6 +67,7 @@ dev = [
 exclude_dirs = [".venv", "build", "dist", "aTrain.egg-info", "aTrain/required_models"]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 # NiceGUI's `user` fixture (UI E2E) is async; auto mode lets pytest-asyncio
 # handle async tests/fixtures without per-item markers.
 asyncio_mode = "auto"
