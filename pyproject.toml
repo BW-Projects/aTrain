@@ -54,6 +54,13 @@ gui = [
 where = ["."]
 include = ["aTrain*"]
 
+[tool.setuptools.package-data]
+# Ship the engine's JSON config, loaded at runtime via
+# importlib.resources.files("aTrain_core.data"). Without this the wheel omits
+# them and a non-editable `pip install` breaks at startup; CI only passes
+# because the tests run from the source tree.
+aTrain_core = ["data/*.json"]
+
 [project.scripts]
 aTrain = "aTrain.app:cli"
 aTrain_core = "aTrain_core.cli:cli"
