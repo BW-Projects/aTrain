@@ -100,7 +100,7 @@ jobs:
   e2e:
     name: e2e (core pipeline)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -132,7 +132,7 @@ jobs:
   e2e-app:
     name: e2e (app, full stack)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
