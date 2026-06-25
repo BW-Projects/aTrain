@@ -4,6 +4,7 @@ __pycache__
 dist
 build
 aTrain.egg-info
+aTrain_core/aTrain_core.egg-info
 installer.iss
 test.py
 aTrain/required_models/*
@@ -16,8 +17,9 @@ aTrain/required_models/*
 docker-compose.override.yml
 
 # Dev-container runtime output: models + transcriptions bind-mounted from
-# the container to ./data (root-owned). Never committed.
-data/
+# the container to ./data (root-owned). Never committed. Anchored to the repo
+# root so it does not also swallow package data dirs (e.g. aTrain_core's).
+/data/
 
 # Environment files (may contain secrets)
 .env

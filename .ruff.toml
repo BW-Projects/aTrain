@@ -2,7 +2,11 @@
 
 target-version = "py311"
 line-length = 100
-src = ["aTrain", "aTrain_core"]
+# Only aTrain is a first-party src root here. aTrain_core is a workspace member
+# whose package sits at aTrain_core/aTrain_core; listing it as a src root would
+# flip isort to treat `aTrain_core` imports as first-party and re-group imports
+# across ~25 files. Pre-workspace it grouped with third-party, so keep that.
+src = ["aTrain"]
 extend-exclude = [
   ".venv",
   "build",
@@ -57,12 +61,12 @@ ignore = [
 # merge). Same rationale as the aTrain block above: defer the manual fixes
 # to small focused PRs so the behaviour change is reviewable. Each entry
 # is removed in the PR that applies the corresponding fix.
-"aTrain_core/__init__.py"       = ["N999"]               # project name aTrain_core intentionally capitalised
-"aTrain_core/__main__.py"       = ["N999"]               # project name aTrain_core intentionally capitalised
-"aTrain_core/load_resources.py" = ["N801", "B026"]       # class `custom_tqdm` lowercase; super().__init__(total=total, *args) star-after-kwarg
-"aTrain_core/transcribe.py"     = ["E402", "B904", "N803", "N806", "B006", "SIM108", "SIM118", "SIM211"]  # late module imports after warnings.filterwarnings; raise without `from`; `returnDict` camelCase; mutable {} default; chained-if/elif; `.keys()`; double-negation
-"aTrain_core/outputs.py"        = ["SIM401"]             # if-expr instead of dict.get default
-"aTrain_core/settings.py"       = ["RET503"]             # implicit None return on one branch
+"aTrain_core/aTrain_core/__init__.py"       = ["N999"]               # project name aTrain_core intentionally capitalised
+"aTrain_core/aTrain_core/__main__.py"       = ["N999"]               # project name aTrain_core intentionally capitalised
+"aTrain_core/aTrain_core/load_resources.py" = ["N801", "B026"]       # class `custom_tqdm` lowercase; super().__init__(total=total, *args) star-after-kwarg
+"aTrain_core/aTrain_core/transcribe.py"     = ["E402", "B904", "N803", "N806", "B006", "SIM108", "SIM118", "SIM211"]  # late module imports after warnings.filterwarnings; raise without `from`; `returnDict` camelCase; mutable {} default; chained-if/elif; `.keys()`; double-negation
+"aTrain_core/aTrain_core/outputs.py"        = ["SIM401"]             # if-expr instead of dict.get default
+"aTrain_core/aTrain_core/settings.py"       = ["RET503"]             # implicit None return on one branch
 
 [format]
 quote-style = "double"

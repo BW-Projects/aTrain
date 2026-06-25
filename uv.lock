@@ -16,6 +16,12 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform != 'linux' and sys_platform != 'win32'",
 ]
 
+[manifest]
+members = [
+    "atrain",
+    "atrain-core",
+]
+
 [[package]]
 name = "aiofiles"
 version = "25.1.0"
@@ -229,19 +235,7 @@ wheels = [
 name = "atrain"
 source = { editable = "." }
 dependencies = [
-    { name = "faster-whisper" },
-    { name = "huggingface-hub" },
-    { name = "jiwer" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "platformdirs" },
-    { name = "pyannote-audio" },
-    { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
-    { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
-    { name = "typer" },
-    { name = "werkzeug" },
+    { name = "atrain-core" },
 ]
 
 [package.optional-dependencies]
@@ -263,25 +257,13 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "atrain-core", editable = "aTrain_core" },
     { name = "dask", marker = "sys_platform == 'linux' and extra == 'gui'" },
-    { name = "faster-whisper", specifier = "==1.2.1" },
-    { name = "huggingface-hub", specifier = "==0.30.2" },
-    { name = "jiwer", specifier = "==3.0.4" },
     { name = "nicegui", marker = "extra == 'gui'", specifier = "==2.21.1" },
-    { name = "numpy", specifier = "==2.2.2" },
-    { name = "pandas", specifier = "==2.3.3" },
-    { name = "platformdirs", specifier = "==4.5.1" },
-    { name = "pyannote-audio", specifier = "==4.0.4" },
     { name = "pywebview", marker = "extra == 'gui'", specifier = "==6.1" },
     { name = "pywebview", extras = ["gtk"], marker = "sys_platform == 'linux' and extra == 'gui'" },
     { name = "show-in-file-manager", marker = "extra == 'gui'", specifier = "==1.1.4" },
-    { name = "torch", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
-    { name = "torch", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
-    { name = "torchaudio", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
-    { name = "torchaudio", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
-    { name = "typer", specifier = "==0.16.0" },
     { name = "wakepy", marker = "extra == 'gui'", specifier = "==0.7.2" },
-    { name = "werkzeug", specifier = "==3.0.3" },
 ]
 provides-extras = ["gui"]
 
@@ -290,6 +272,42 @@ dev = [
     { name = "bandit", extras = ["toml"], specifier = ">=1.9.0" },
     { name = "pip-audit", specifier = ">=2.10.0" },
     { name = "ruff", specifier = ">=0.15.0" },
+]
+
+[[package]]
+name = "atrain-core"
+source = { editable = "aTrain_core" }
+dependencies = [
+    { name = "faster-whisper" },
+    { name = "huggingface-hub" },
+    { name = "jiwer" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "platformdirs" },
+    { name = "pyannote-audio" },
+    { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
+    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
+    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "typer" },
+    { name = "werkzeug" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "faster-whisper", specifier = "==1.2.1" },
+    { name = "huggingface-hub", specifier = "==0.30.2" },
+    { name = "jiwer", specifier = "==3.0.4" },
+    { name = "numpy", specifier = "==2.2.2" },
+    { name = "pandas", specifier = "==2.3.3" },
+    { name = "platformdirs", specifier = "==4.5.1" },
+    { name = "pyannote-audio", specifier = "==4.0.4" },
+    { name = "torch", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
+    { name = "torch", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
+    { name = "torchaudio", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
+    { name = "torchaudio", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
+    { name = "typer", specifier = "==0.16.0" },
+    { name = "werkzeug", specifier = "==3.0.3" },
 ]
 
 [[package]]

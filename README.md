@@ -76,18 +76,26 @@ is also installable via pip and exposes a CLI.
 
 ### Install
 
-Until aTrain ships on PyPI, install directly from the GitHub repo. Engine
-only (CLI usage):
+Until the packages ship on PyPI, install directly from the GitHub repo. For
+headless / CLI usage you only need the `aTrain_core` engine (its own workspace
+member):
 
 ```bash
-pip install "aTrain @ git+https://github.com/JuergenFleiss/aTrain.git"
+pip install "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain.git#subdirectory=aTrain_core"
 ```
 
-For `aTrain start` (the desktop / browser app), add the GUI extras:
+For the full desktop / browser app (`aTrain start`) install both packages —
+`aTrain[gui]` and its `aTrain_core` engine. pip can't resolve the workspace
+member on its own, so name both refs explicitly:
 
 ```bash
-pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git"
+pip install \
+  "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git" \
+  "aTrain_core @ git+https://github.com/JuergenFleiss/aTrain.git#subdirectory=aTrain_core"
 ```
+
+From a clone, `uv sync` (add `--extra gui` for the app) resolves the whole
+workspace in one step.
 
 On Windows, prepend the PyTorch CUDA index for the `cu130` torch wheel:
 
@@ -101,8 +109,8 @@ NVIDIA CUDA GPU support currently covers Windows and Debian-based Linux.
 > 💡 **Linux + slow disk**: if `pip install` keeps killing the torch wheel
 > collection, retry with `--no-cache-dir`.
 
-When aTrain reaches PyPI (planned, not yet), the install command becomes
-`pip install aTrain` and `pip install 'aTrain[gui]'`.
+When the packages reach PyPI (planned, not yet), these become
+`pip install aTrain_core`, `pip install aTrain`, and `pip install 'aTrain[gui]'`.
 
 ### Transcribe from the command line
 

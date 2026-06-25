@@ -19,21 +19,8 @@ license = { file = "LICENSE" }
 requires-python = ">=3.11"
 
 dependencies = [
-  # Engine (formerly aTrain_core's own dependencies; consolidated post-monorepo merge)
-  "faster-whisper==1.2.1",
-  "pandas==2.3.3",
-  "pyannote.audio==4.0.4",
-  "numpy==2.2.2",
-  "werkzeug==3.0.3",
-  "huggingface-hub==0.30.2",
-  "torch==2.9.1+cu130; sys_platform == 'win32'",
-  "torch==2.9.1; sys_platform != 'win32'",
-  # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
-  "torchaudio==2.9.1+cu130; sys_platform == 'win32'",
-  "torchaudio==2.9.1; sys_platform != 'win32'",
-  "typer==0.16.0",
-  "platformdirs==4.5.1",
-  "jiwer==3.0.4",
+  # Engine lives in the aTrain_core workspace member; the UI depends on it.
+  "aTrain_core",
 ]
 
 [project.optional-dependencies]
@@ -52,14 +39,16 @@ gui = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["aTrain*"]
+include = ["aTrain"]
 
 [project.scripts]
 aTrain = "aTrain.app:cli"
-aTrain_core = "aTrain_core.cli:cli"
 
 [tool.setuptools.dynamic]
 version = { attr = "aTrain.version.__version__" }
+
+[tool.uv.workspace]
+members = ["aTrain_core"]
 
 [tool.uv]
 # torch+cu130 wheels live only on download.pytorch.org; PyPI rejects
@@ -72,9 +61,10 @@ url = "https://download.pytorch.org/whl/cu130"
 explicit = true  # only used when [tool.uv.sources] points at it (win32 torch+cu130). Without this, unsafe-best-match would also pull cu130 wheels on Linux, which break the torchcodec binary ABI.
 
 [tool.uv.sources]
-torch       = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
-torchaudio  = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
-torchvision = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+# aTrain_core resolves from the workspace (dev + lockfile), not PyPI.
+aTrain_core = { workspace = true }
+# torch+cu130 source pins live in aTrain_core/pyproject.toml (where torch is
+# declared); the pytorch-cu130 index above is workspace-wide.
 
 [dependency-groups]
 dev = [
