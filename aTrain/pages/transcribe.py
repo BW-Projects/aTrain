@@ -33,21 +33,24 @@ async def page(client: Client):
                 "open_advanced_settings"
             )
             settings_btn.props("size=0.8rem unelevated no-caps icon=settings")
-            if FLATPAK:
 
-                async def start_from_selected():
-                    if not getattr(file, "selected_path", None):
-                        ui.notify("Please select a file first", color="negative")
-                        return
+            async def start_from_selected():
+                # Native modes (Flatpak portal + pywebview create_file_dialog
+                # under WebKit/Edge) populate selected_path/selected_name on
+                # the uploader directly. Browser mode (no native window) still
+                # falls back to the JS upload flow via file.upload() → on_upload.
+                if getattr(file, "selected_path", None):
                     payload = SimpleNamespace(
                         name=file.selected_name,
                         content=Path(file.selected_path),
                     )
                     await start_transcription(payload)
+                    return
+                # Browser-mode fallback: trigger HTTP upload, on_upload fires
+                # start_transcription once the file arrives.
+                file.upload()
 
-                start_btn = ui.button("Start", on_click=start_from_selected, color="dark")
-            else:
-                start_btn = ui.button("Start", on_click=file.upload, color="dark")
+            start_btn = ui.button("Start", on_click=start_from_selected, color="dark")
             start_btn.props("no-caps unelevated")
             advanced_settings(open=False)
 

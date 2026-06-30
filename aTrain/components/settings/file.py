@@ -42,9 +42,50 @@ def input_file() -> CustomUpload:
             select_button.classes("w-full h-full")
 
     if not FLATPAK:
-        select_button.bind_text(uploader, "file_text")
-        select_button.bind_icon(uploader, "file_icon")
-        select_button.on_click(uploader.pick_files)
+        # Use pywebview's native file dialog instead of NiceGUI's JS-side
+        # uploader.pick_files() (which calls input.click() on a hidden <input
+        # type="file">). On WebKitGTK (the default Linux backend since #161
+        # switched from pywebview[qt] to pywebview[GTK]) programmatic file-input
+        # clicks are blocked unless they fire synchronously in the user-click
+        # call stack — and NiceGUI's run_method round-trip never is. The
+        # pywebview dialog bypasses the WebKit input.click() rule entirely.
+        with file_column:
+            file_label = ui.label("No file selected").classes("text-sm text-gray-500")
+
+        uploader.selected_content = None
+        uploader.selected_name = None
+        uploader.selected_path = None
+        select_button.text = "Select File"
+
+        async def on_pick():
+            from nicegui import app
+
+            main_window = getattr(getattr(app, "native", None), "main_window", None)
+            if main_window is None:
+                # Browser mode (no native window) — fall back to the JS picker.
+                uploader.pick_files()
+                return
+
+            # Pass dialog_type=10 explicitly (=== webview.OPEN_DIALOG). DON'T use
+            # the constant — it is a `proxy_tools.Proxy` lazy wrapper emitting
+            # a deprecation warning, and it fails to pickle across the
+            # multiprocessing boundary into pywebview's worker process with
+            # "not the same object as webview.OPEN_DIALOG".
+            # file_types format is dictated by pywebview's parse_file_type:
+            # "Description (*.ext;*.ext)" with word-only description (no "/"!).
+            pywebview_formats = ";".join(f"*{ext}" for ext in load_formats())
+            result = await main_window.create_file_dialog(
+                dialog_type=10,
+                file_types=(f"Audio and Video ({pywebview_formats})", "All files (*.*)"),
+            )
+            if not result:
+                return
+            path = result[0] if isinstance(result, (list, tuple)) else result
+            uploader.selected_path = path
+            uploader.selected_name = os.path.basename(path)
+            file_label.text = uploader.selected_name
+
+        select_button.on_click(on_pick)
         return uploader
 
     with file_column:
