@@ -69,6 +69,74 @@ Transcription Time (incl. speaker detection) for 00:22:00 File:
 | GPU: RTX 2070 Max-Q    | 00:05:59    | 00:??:??          | 00:04:37       |
 
 
+## Headless / CLI Usage
+
+For headless transcription pipelines (servers, automation, scripts) aTrain
+is also installable via pip and exposes a CLI.
+
+### Install
+
+Until aTrain ships on PyPI, install directly from the GitHub repo. Engine
+only (CLI usage):
+
+```bash
+pip install "aTrain @ git+https://github.com/JuergenFleiss/aTrain.git"
+```
+
+For `aTrain start` (the desktop / browser app), add the GUI extras:
+
+```bash
+pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git"
+```
+
+On Windows, prepend the PyTorch CUDA index for the `cu130` torch wheel:
+
+```bash
+pip install ... --extra-index-url https://download.pytorch.org/whl/cu130
+```
+
+On Linux the PyPI torch wheel already bundles CUDA; macOS is CPU-only.
+NVIDIA CUDA GPU support currently covers Windows and Debian-based Linux.
+
+> 💡 **Linux + slow disk**: if `pip install` keeps killing the torch wheel
+> collection, retry with `--no-cache-dir`.
+
+When aTrain reaches PyPI (planned, not yet), the install command becomes
+`pip install aTrain` and `pip install 'aTrain[gui]'`.
+
+### Transcribe from the command line
+
+Default settings:
+
+```bash
+aTrain_core transcribe /path/to/audio/file.mp3
+```
+
+With overrides:
+
+```bash
+aTrain_core transcribe /path/to/audio/file.mp3 \
+    --model <MODEL> --language <LANGUAGE> \
+    --speaker-detection --speaker-count <N> \
+    --device <DEVICE> --compute-type <COMPUTE_TYPE>
+```
+
+The full list of model configurations (with **defaults in bold**):
+
+![Model Configurations](docs/images/model_configurations.png)
+
+> 💡 **Distilled models** (e.g. `faster-distil-english`) need an explicit
+> `--language` flag since they are single-language only.
+
+### Manage models manually
+
+```bash
+aTrain init                # download the required models in one go
+aTrain_core load <MODEL>   # download a specific model
+aTrain_core load all       # download every supported model
+aTrain_core remove <MODEL> # delete a specific model
+```
+
 ## Roadmap and Upcoming Features
 
 Planned in the near future.
