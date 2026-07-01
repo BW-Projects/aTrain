@@ -14,6 +14,10 @@ FLATPAK = bool(os.environ.get("FLATPAK_ID"))
 # (Flatpak, MSIX, native pip on Linux/macOS/Windows, Docker); `setdefault`
 # respects an explicitly-set env var if an operator wants metrics on.
 os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
+LINUX = platform.system().lower() == "linux"
+# pyannote requires an explicit opt-in/out for telemetry metrics
+if FLATPAK:
+    os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
 
 # Keep `spawn` for Flatpak x86; avoid forcing it on Flatpak ARM.
 if FLATPAK and platform.machine().lower() not in {"aarch64", "arm64"}:
