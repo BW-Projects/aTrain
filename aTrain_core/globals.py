@@ -9,6 +9,7 @@ from typing import cast
 from platformdirs import user_data_path, user_documents_path
 
 FLATPAK = bool(os.environ.get("FLATPAK_ID"))
+LINUX = platform.system().lower() == "linux"
 # pyannote requires an explicit opt-in/out for telemetry metrics
 if FLATPAK:
     os.environ.setdefault("PYANNOTE_METRICS_ENABLED", "false")
