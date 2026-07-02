@@ -30,3 +30,7 @@ docs/
 # Dev-container runtime output (models + transcriptions); bind-mounted at
 # runtime, must not enter the build context.
 data/
+
+# Bundled Whisper/pyannote models (~1.5 GB); downloaded at runtime, not needed
+# in the build context.
+aTrain/required_models/
