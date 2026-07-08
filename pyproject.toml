@@ -26,10 +26,10 @@ dependencies = [
   "numpy==2.2.2",
   "werkzeug==3.0.3",
   "huggingface-hub==0.30.2",
-  "torch==2.9.1+cu130; sys_platform == 'win32'",
+  "torch==2.9.1+cu128; sys_platform == 'win32'",
   "torch==2.9.1; sys_platform != 'win32'",
   # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
-  "torchaudio==2.9.1+cu130; sys_platform == 'win32'",
+  "torchaudio==2.9.1+cu128; sys_platform == 'win32'",
   "torchaudio==2.9.1; sys_platform != 'win32'",
   "typer==0.16.0",
   "platformdirs==4.5.1",
@@ -69,19 +69,19 @@ aTrain_core = "aTrain_core.cli:cli"
 version = { attr = "aTrain.version.__version__" }
 
 [tool.uv]
-# torch+cu130 wheels live only on download.pytorch.org; PyPI rejects
+# torch+cu128 wheels live only on download.pytorch.org; PyPI rejects
 # local-version tags (+...), so cross-index name collision is impossible.
 index-strategy = "unsafe-best-match"
 
 [[tool.uv.index]]
-name = "pytorch-cu130"
-url = "https://download.pytorch.org/whl/cu130"
-explicit = true  # only used when [tool.uv.sources] points at it (win32 torch+cu130). Without this, unsafe-best-match would also pull cu130 wheels on Linux, which break the torchcodec binary ABI.
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true  # only used when [tool.uv.sources] points at it (win32 torch+cu128). Without this, unsafe-best-match would also pull cu128 wheels on Linux, which break the torchcodec binary ABI.
 
 [tool.uv.sources]
-torch       = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
-torchaudio  = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
-torchvision = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
+torch       = [{ index = "pytorch-cu128", marker = "sys_platform == 'win32'" }]
+torchaudio  = [{ index = "pytorch-cu128", marker = "sys_platform == 'win32'" }]
+torchvision = [{ index = "pytorch-cu128", marker = "sys_platform == 'win32'" }]
 
 [dependency-groups]
 dev = [
