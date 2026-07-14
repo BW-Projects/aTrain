@@ -26,15 +26,15 @@ authors:
     affiliation: University of Graz
 identifiers:
   - type: url
-    value: 'https://github.com/BANDAS-Center/aTrain'
+    value: 'https://github.com/aTrainTranscription/aTrain'
     description: 'The GitHub repository for aTrain'
-repository-code: 'https://github.com/BANDAS-Center/aTrain'
+repository-code: 'https://github.com/aTrainTranscription/aTrain'
 url: 'https://business-analytics.uni-graz.at/en/research/atrain/'
 abstract: >-
-  aTrain is a tool for automatically transcribing speech recordings 
-  utilizing state-of-the-art machine learning models without uploading 
-  any data. It provides a user-friendly interface to OpenAI's Whisper 
-  model, ensuring high-quality transcription while preserving data 
+  aTrain is a tool for automatically transcribing speech recordings
+  utilizing state-of-the-art machine learning models without uploading
+  any data. It provides a user-friendly interface to OpenAI's Whisper
+  model, ensuring high-quality transcription while preserving data
   privacy by processing everything locally on the user's device.
 keywords:
   - transcription
@@ -45,9 +45,8 @@ keywords:
   - interviews
   - qualitative-research
 license: AGPL-3.0-or-later
-commit: main
 version: "1.4.2"
-date-released: "2026-02-12"
+date-released: 2026-02-12
 preferred-citation:
   type: article
   authors:
@@ -66,7 +65,7 @@ preferred-citation:
   doi: "10.1016/j.jbef.2024.100891"
   journal: "Journal of Behavioral and Experimental Finance"
   title: >-
-    Take the aTrain. Introducing an Interface for the Accessible 
+    Take the aTrain. Introducing an Interface for the Accessible
     Transcription of Interviews
   volume: 41
   year: 2024
