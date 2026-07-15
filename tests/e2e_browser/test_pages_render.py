@@ -2,7 +2,7 @@
 
 Parallels tests/ui/test_pages_render.py (which drives NiceGUI's in-process
 `User` fixture). These tests hit the actual JS / CSS / WebSocket path through
-a real Chromium — they catch client-side rendering regressions and
+a real Chromium - they catch client-side rendering regressions and
 browser-server contract issues the in-process fixture cannot see.
 
 Scope of the initial PoC: render + presence smokes on the same subset of

@@ -1,8 +1,8 @@
 """Real-browser interaction smokes for the transcribe page.
 
 Sister to `test_pages_render.py` (pure render/presence). These drive
-actual clicks and assert reactive JS-side state — visibility toggles
-and dialog open/close — that the in-process NiceGUI User fixture
+actual clicks and assert reactive JS-side state - visibility toggles
+and dialog open/close - that the in-process NiceGUI User fixture
 can't observe (it inspects Python-side element state, not the DOM
 Quasar produces).
 """

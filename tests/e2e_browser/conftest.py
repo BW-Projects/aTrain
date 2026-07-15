@@ -8,7 +8,7 @@ Individual tests receive Playwright's own `page` / `browser` fixtures from
 pytest-playwright and drive real Chromium against the running server.
 
 Kept in its own directory so `tests/ui/conftest.py`'s
-`pytest_plugins = ["nicegui.testing.user_plugin"]` does not apply here — the
+`pytest_plugins = ["nicegui.testing.user_plugin"]` does not apply here - the
 in-process NiceGUI User fixture and a real browser can't share the same
 event loop.
 """
@@ -28,7 +28,7 @@ BOOT_TIMEOUT_S = 90
 
 @pytest.fixture(scope="session")
 def atrain_server() -> Generator[str, None, None]:
-    # WAKEPY_FAKE_SUCCESS mirrors tests/ui/test_boot_serve.py — wakepy has no
+    # WAKEPY_FAKE_SUCCESS mirrors tests/ui/test_boot_serve.py - wakepy has no
     # backend on headless CI and raises without it.
     env = {**os.environ, "WAKEPY_FAKE_SUCCESS": "1"}
     proc = subprocess.Popen(
