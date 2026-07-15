@@ -42,7 +42,7 @@ elif find_spec("aTrain"):
     # Same fallback as the Flatpak branch above: only use the in-package dir
     # when it actually ships models. The install location can be read-only
     # (MSIX under C:\Program Files\WindowsApps\), so a missing dir must not
-    # be created there at runtime — downloads go to the writable MODELS_DIR.
+    # be created there at runtime - downloads go to the writable MODELS_DIR.
     packaged_required_models_dir = cast(Path, files("aTrain") / "required_models")
     REQUIRED_MODELS_DIR = (
         packaged_required_models_dir if packaged_required_models_dir.is_dir() else MODELS_DIR
