@@ -217,7 +217,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/90/fa/5c2be1f96dc179f83cdd3bb267edbd1f47d08f756785c016d5c2163901a7/asteroid-filterbanks-0.4.0.tar.gz", hash = "sha256:415f89d1dcf2b13b35f03f7a9370968ac4e6fa6800633c522dac992b283409b9", size = 24599, upload-time = "2021-04-09T20:03:07.456Z" }
@@ -237,9 +237,9 @@ dependencies = [
     { name = "platformdirs" },
     { name = "pyannote-audio" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torchaudio", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "typer" },
     { name = "werkzeug" },
 ]
@@ -276,9 +276,9 @@ requires-dist = [
     { name = "pywebview", extras = ["gtk"], marker = "sys_platform == 'linux' and extra == 'gui'" },
     { name = "show-in-file-manager", marker = "extra == 'gui'", specifier = "==1.1.4" },
     { name = "torch", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
-    { name = "torch", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
+    { name = "torch", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu128", index = "https://download.pytorch.org/whl/cu128" },
     { name = "torchaudio", marker = "sys_platform != 'win32'", specifier = "==2.9.1" },
-    { name = "torchaudio", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu130", index = "https://download.pytorch.org/whl/cu130" },
+    { name = "torchaudio", marker = "sys_platform == 'win32'", specifier = "==2.9.1+cu128", index = "https://download.pytorch.org/whl/cu128" },
     { name = "typer", specifier = "==0.16.0" },
     { name = "wakepy", marker = "extra == 'gui'", specifier = "==0.7.2" },
     { name = "werkzeug", specifier = "==3.0.3" },
@@ -1286,7 +1286,7 @@ version = "0.2.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1d/c6/5c2aea2b11ead1680bb5b17c996def31f8ccade471cada37cdb93855e06f/julius-0.2.8.tar.gz", hash = "sha256:d691e651200930affea4f6c849c26e95fec846087281ae3d1a7757eac90253d5", size = 48081, upload-time = "2026-06-03T16:05:34.52Z" }
 wheels = [
@@ -1422,7 +1422,7 @@ dependencies = [
     { name = "pytorch-lightning" },
     { name = "pyyaml" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torchmetrics" },
     { name = "tqdm" },
     { name = "typing-extensions" },
@@ -2710,10 +2710,10 @@ dependencies = [
     { name = "rich" },
     { name = "safetensors" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torch-audiomentations" },
     { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torchaudio", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torchcodec" },
     { name = "torchmetrics" },
 ]
@@ -3156,7 +3156,7 @@ dependencies = [
     { name = "packaging" },
     { name = "pyyaml" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torchmetrics" },
     { name = "tqdm" },
     { name = "typing-extensions" },
@@ -3174,7 +3174,7 @@ dependencies = [
     { name = "numpy" },
     { name = "scikit-learn" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "tqdm" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9b/80/6e61b1a91debf4c1b47d441f9a9d7fe2aabcdd9575ed70b2811474eb95c3/pytorch-metric-learning-2.9.0.tar.gz", hash = "sha256:27a626caf5e2876a0fd666605a78cb67ef7597e25d7a68c18053dd503830701f", size = 84530, upload-time = "2025-08-17T17:11:19.501Z" }
@@ -3971,8 +3971,8 @@ wheels = [
 
 [[package]]
 name = "torch"
-version = "2.9.1+cu130"
-source = { registry = "https://download.pytorch.org/whl/cu130" }
+version = "2.9.1+cu128"
+source = { registry = "https://download.pytorch.org/whl/cu128" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
@@ -3989,12 +3989,12 @@ dependencies = [
     { name = "typing-extensions", marker = "sys_platform == 'win32'" },
 ]
 wheels = [
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp311-cp311-win_amd64.whl", hash = "sha256:8db2814e63f2b365bda88526587ca75a6083a0b957a24b2b0d45ddc5ee350176", upload-time = "2026-01-26T16:37:38Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp312-cp312-win_amd64.whl", hash = "sha256:cd3232a562ad2a2699d48130255e1b24c07dfe694a40dcd24fad683c752de121", upload-time = "2026-01-26T16:37:50Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp313-cp313-win_amd64.whl", hash = "sha256:47cae56331fdec7f7082aad967b25868cc5f94b203fc273e40346a852aa009dd", upload-time = "2026-01-26T16:38:27Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp313-cp313t-win_amd64.whl", hash = "sha256:c0bb31481c3f505cb5baa630f2b975f07f77be557bbafe5cfc695ac911ea325c", upload-time = "2026-01-26T16:38:52Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp314-cp314-win_amd64.whl", hash = "sha256:a80fe3b0467b6986741f28e88fcff0054a6a806616946f28f5f601bd95632ba0", upload-time = "2026-01-26T16:39:05Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torch-2.9.1%2Bcu130-cp314-cp314t-win_amd64.whl", hash = "sha256:59c74f9d2b49778b146f23bcfebc35f051d64f10ff0dbdfd22387a7bd1d9ed71", upload-time = "2026-01-26T16:39:39Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp311-cp311-win_amd64.whl", hash = "sha256:633005a3700e81b5be0df2a7d3c1d48aced23ed927653797a3bd2b144a3aeeb6", upload-time = "2026-01-26T16:54:12Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp312-cp312-win_amd64.whl", hash = "sha256:3a01f0b64c10a82d444d9fd06b3e8c567b1158b76b2764b8f51bfd8f535064b0", upload-time = "2026-01-26T16:54:32Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp313-cp313-win_amd64.whl", hash = "sha256:ad9183864acdd99fc5143d7ca9d3d2e7ddfc9a9600ff43217825d4e5e9855ccc", upload-time = "2026-01-26T16:55:00Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp313-cp313t-win_amd64.whl", hash = "sha256:24420e430e77136f7079354134b34e7ba9d87e539f5ac84c33b08e5c13412ebe", upload-time = "2026-01-26T16:55:48Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp314-cp314-win_amd64.whl", hash = "sha256:7bcd40cbffac475b478d6ce812f03da84e9a4894956efb89c3b7bcca5dbd4f91", upload-time = "2026-01-26T16:56:12Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1%2Bcu128-cp314-cp314t-win_amd64.whl", hash = "sha256:0c784b600959ec70ee01cb23e8bc870a0e0475af30378ff5e39f4abed8b7c1cc", upload-time = "2026-01-26T16:56:38Z" },
 ]
 
 [[package]]
@@ -4004,10 +4004,10 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "julius" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torch-pitch-shift" },
     { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torchaudio", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/31/8d/2f8fd7e34c75f5ee8de4310c3bd3f22270acd44d1f809e2fe7c12fbf35f8/torch_audiomentations-0.12.0.tar.gz", hash = "sha256:b02d4c5eb86376986a53eb405cca5e34f370ea9284411237508e720c529f7888", size = 52094, upload-time = "2025-01-15T09:07:01.071Z" }
 wheels = [
@@ -4022,9 +4022,9 @@ dependencies = [
     { name = "packaging" },
     { name = "primepy" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
     { name = "torchaudio", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torchaudio", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torchaudio", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/79/a6/722a832bca75d5079f6731e005b3d0c2eec7c6c6863d030620952d143d57/torch_pitch_shift-1.2.5.tar.gz", hash = "sha256:6e1c7531f08d0f407a4c55e5ff8385a41355c5c5d27ab7fa08632e51defbd0ed", size = 4725, upload-time = "2024-09-25T19:10:12.922Z" }
 wheels = [
@@ -4071,8 +4071,8 @@ wheels = [
 
 [[package]]
 name = "torchaudio"
-version = "2.9.1+cu130"
-source = { registry = "https://download.pytorch.org/whl/cu130" }
+version = "2.9.1+cu128"
+source = { registry = "https://download.pytorch.org/whl/cu128" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform == 'win32'",
@@ -4080,15 +4080,15 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
 dependencies = [
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
 ]
 wheels = [
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp311-cp311-win_amd64.whl", hash = "sha256:817e2660d35a3c9a2638dd80d63c7a488cbbe87446ddbb564a5cf88b9de632f7", upload-time = "2025-11-11T19:17:10Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp312-cp312-win_amd64.whl", hash = "sha256:7533a17bed21e5b86b8c49fd79656779779f2c991aef2804af6f318d2022ea6a", upload-time = "2025-11-11T19:17:10Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp313-cp313-win_amd64.whl", hash = "sha256:2e90a149a17a41676f5a2e4e95c3a46baf3a9389af205894c23b056c8ad06daf", upload-time = "2025-11-11T19:17:10Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp313-cp313t-win_amd64.whl", hash = "sha256:e2ab09a0f7c9cd2a5eaa87d84e04bd24852655d741e8cacd6c8bd80e1dc453b9", upload-time = "2025-11-11T19:17:10Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp314-cp314-win_amd64.whl", hash = "sha256:402819af20f3a84b82e94e0b810fd394d0ad56147d46cd642ffb968ce85b9f5e", upload-time = "2025-11-11T19:17:11Z" },
-    { url = "https://download-r2.pytorch.org/whl/cu130/torchaudio-2.9.1%2Bcu130-cp314-cp314t-win_amd64.whl", hash = "sha256:e6bab62f79b51b9c02516b60bc884155239bef1515d08e29df741a7896422ff8", upload-time = "2025-11-11T19:17:11Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp311-cp311-win_amd64.whl", hash = "sha256:c91eea923573e7b02611a324232e4adb7aad5f828aa875b1f48241c228980899", upload-time = "2025-11-11T19:17:09Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp312-cp312-win_amd64.whl", hash = "sha256:88896c7bfa486102439fab6c85ac834176617e9c06eb0be9074c07ee1183b47d", upload-time = "2025-11-11T19:17:09Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp313-cp313-win_amd64.whl", hash = "sha256:abb0ee5a40c883ad17d90cdd45965c06deef42a0a2ffc58c51e32729642292f0", upload-time = "2025-11-11T19:17:09Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp313-cp313t-win_amd64.whl", hash = "sha256:9d29dc3a2e0c43da66d33bcb9e22ad58c58f0ae1b6dcfe2d8d94bda279ddcf89", upload-time = "2025-11-11T19:17:09Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp314-cp314-win_amd64.whl", hash = "sha256:eb6c714557c8d47f4fc65ec58b14a21cb4150940c242fe77e7517636c20ed3c3", upload-time = "2025-11-11T19:17:09Z" },
+    { url = "https://download-r2.pytorch.org/whl/cu128/torchaudio-2.9.1%2Bcu128-cp314-cp314t-win_amd64.whl", hash = "sha256:150a8d7d51df9f667b5386cff5850f685b6059c59db51e056d7157955aad9e75", upload-time = "2025-11-11T19:17:09Z" },
 ]
 
 [[package]]
@@ -4127,7 +4127,7 @@ dependencies = [
     { name = "numpy" },
     { name = "packaging" },
     { name = "torch", version = "2.9.1", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'win32'" },
-    { name = "torch", version = "2.9.1+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
+    { name = "torch", version = "2.9.1+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/81/34/39b8b749333db56c0585d7a11fa62a283c087bb1dfc897d69fb8cedbefb1/torchmetrics-1.9.0.tar.gz", hash = "sha256:a488609948600df52d3db4fcdab02e62aab2a85ef34da67037dc3e65b8512faa", size = 581765, upload-time = "2026-03-09T17:41:22.443Z" }
 wheels = [

@@ -3,17 +3,16 @@
 ## Accessible Transcription of Interviews
 aTrain is a tool for automatically transcribing speech recordings utilizing state-of-the-art machine learning models without uploading any data. It was developed by researchers at the Business Analytics and Data Science-Center at the University of Graz and tested by researchers from the Know-Center Graz.
 
-
+## Get aTrain
 <p>
   <a href="https://flathub.org/apps/io.github.juergenfleiss.aTrain">
-    <img height="58" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en">
-  </a>
+    <img height="58" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en"></a>
   &nbsp;&nbsp;
   <a href="https://apps.microsoft.com/detail/9N15Q44SZNS2?mode=direct">
-    <img width="220" alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg">
-  </a>
+    <img width="220" alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg"></a>
 </p>
 
+aTrain is published on Flathub for Linux and the Microsoft Store for Windows.  Additional download types [can be found here](https://business-analytics.uni-graz.at/de/forschung/atrain/download/).
 
 
 ## About aTrain
