@@ -137,7 +137,7 @@ description:
 
 legal:
   license: AGPL-3.0-or-later # TODO(opencode): confirm this is on OpenCode's permitted-licenses list.
-  mainCopyrightOwner: University of Graz
+  mainCopyrightOwner: Jürgen Fleiß
 
 maintenance:
   type: community
