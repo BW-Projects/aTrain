@@ -169,6 +169,46 @@ jobs:
         # subprocess; --no-sync keeps the just-installed pytest in place.
         run: uv run --no-sync pytest tests/core tests/ui -v
 
+  e2e-browser:
+    name: e2e (real browser, Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install GTK build deps for pywebview[GTK]
+        # Same as e2e-app: the locked deps include pywebview[GTK] on Linux
+        # even though we only run in browser mode here (--no-native). Keeps
+        # the install path identical to the shipped stack.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libgirepository1.0-dev
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install app runtime + pytest + Playwright
+        run: |
+          uv sync --locked --extra gui
+          uv pip install pytest pytest-playwright
+
+      - name: Install Playwright browsers (Chromium only for PoC)
+        # --with-deps pulls the system libs Playwright's Chromium needs on
+        # Ubuntu. Only Chromium for the PoC; adding WebKit / Firefox is a
+        # separate follow-up matrix entry.
+        run: uv run --no-sync playwright install --with-deps chromium
+
+      - name: Run real-browser e2e tests
+        # Uses the same `aTrain start --no-native` subprocess pattern as the
+        # boot smoke, plus Playwright's Chromium driving it. See
+        # tests/e2e_browser/conftest.py for the fixture.
+        run: uv run --no-sync pytest tests/e2e_browser -v
+
   unit:
     name: unit (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
