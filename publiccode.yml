@@ -1,7 +1,7 @@
 # This repository adheres to the publiccode.yml standard by including this
 # metadata file that makes public software easily discoverable.
 # More info at https://github.com/italia/publiccode.yml
-publiccodeYmlVersion: "0.4" # TODO(opencode): confirm the version editor.opencode.de expects.
+publiccodeYmlVersion: "0.4"
 
 name: aTrain
 url: "https://github.com/aTrainTranscription/aTrain"
