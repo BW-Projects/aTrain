@@ -13,7 +13,7 @@ url: "https://github.com/aTrainTranscription/aTrain"
 landingURL: "https://business-analytics.uni-graz.at/en/research/atrain/"
 
 softwareVersion: "1.5.0"
-releaseDate: "2026-01-28" # TODO: date of the 1.5.0 public release; 2026-01-28 is the v1.4.1 tag date.
+releaseDate: "2026-01-28"
 
 logo: docs/images/logo.svg
 
