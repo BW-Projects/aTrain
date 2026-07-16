@@ -131,7 +131,7 @@ description:
       - share/screenshots/screenshot_5.png
 
 legal:
-  license: AGPL-3.0-or-later # TODO(opencode): confirm this is on OpenCode's permitted-licenses list.
+  license: AGPL-3.0-or-later
   mainCopyrightOwner: Jürgen Fleiß
 
 maintenance:
