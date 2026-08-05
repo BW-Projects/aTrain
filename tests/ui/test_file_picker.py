@@ -54,6 +54,29 @@ async def test_ui_stays_responsive_while_picker_is_open(user: User, blocking_pic
     await user.should_see("audio.mp3", retries=100)
 
 
+async def test_second_click_while_picker_open_is_ignored(user: User, monkeypatch):
+    # The portal dialog is unparented, so only the disabled button prevents
+    # stacking a second dialog on top of the pending one.
+    calls = []
+    release = threading.Event()
+
+    def fake_pick():
+        calls.append(1)
+        assert release.wait(timeout=5), "test never released the fake picker"
+        return "/home/user/recordings/audio.mp3"
+
+    monkeypatch.setattr(file_component, "pick_file_native", fake_pick)
+    await user.open("/")
+    await user.should_see("Select File", retries=100)
+    user.find(kind=ui.button, content="Select File").click()
+    await asyncio.sleep(0.1)
+    user.find(kind=ui.button, content="Select File").click()  # pending -> ignored
+    await asyncio.sleep(0.1)
+    release.set()
+    await user.should_see("audio.mp3", retries=100)
+    assert calls == [1]
+
+
 async def test_cancelled_pick_keeps_previous_state(user: User, monkeypatch):
     monkeypatch.setattr(file_component, "pick_file_native", lambda: None)
     await user.open("/")

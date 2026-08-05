@@ -129,14 +129,24 @@ def input_file() -> CustomUpload:
     select_button.text = "Select File"
 
     async def on_pick():
-        # The portal dialog blocks until the user picks or cancels; run it in
-        # a worker thread so the server's event loop keeps serving (a blocked
-        # loop stops websocket heartbeats and the client shows "Connection
-        # lost" while the picker is open). Plain asyncio.to_thread instead of
-        # run.io_bound: nicegui's thread pool is shut down by the stop
-        # button's tear_down and never rebuilt, this picker must still work
-        # afterwards.
-        path = await asyncio.to_thread(pick_file_native)
+        # Re-entry guard: the portal dialog is not parented to our window
+        # (OpenFile gets an empty parent handle), so nothing OS-level stops a
+        # second click from opening a second dialog. Disable the button while
+        # a pick is pending instead.
+        if not select_button.enabled:
+            return
+        select_button.disable()
+        try:
+            # The portal dialog blocks until the user picks or cancels; run
+            # it in a worker thread so the server's event loop keeps serving
+            # (a blocked loop stops websocket heartbeats and the client shows
+            # "Connection lost" while the picker is open). Plain
+            # asyncio.to_thread instead of run.io_bound: nicegui's thread
+            # pool is shut down by the stop button's tear_down and never
+            # rebuilt, and this picker must still work afterwards.
+            path = await asyncio.to_thread(pick_file_native)
+        finally:
+            select_button.enable()
         if not path:
             return
         uploader.selected_path = path
