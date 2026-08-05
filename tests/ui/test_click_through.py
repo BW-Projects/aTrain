@@ -8,9 +8,7 @@ with the tiny model on CPU. Complements the lighter boot-serve smoke.
 from pathlib import Path
 from types import SimpleNamespace
 
-import aTrain.pages.transcribe as transcribe_page
 import aTrain_core.transcribe  # noqa: F401  pre-import so the splash import is instant
-import pytest
 from aTrain.utils.transcription import start_transcription
 from nicegui import app
 from nicegui.testing import User
@@ -18,13 +16,11 @@ from nicegui.testing import User
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "sample_short.mp3"
 
 
-@pytest.mark.module_under_test(transcribe_page)
 async def test_main_page_renders(user: User):
     await user.open("/")
     await user.should_see("Start", retries=100)
 
 
-@pytest.mark.module_under_test(transcribe_page)
 async def test_transcribe_through_ui(user: User):
     await user.open("/")
     # The UI settings components write into app.storage.general; set them
