@@ -1,8 +1,12 @@
 name: Release
 
-# Phase 1 of #212 — unsigned Windows MSIX, tag-triggered. Builds via
-# PyInstaller + makeappx.exe, uploads as workflow artifact. Signing (#211),
-# Flatpak (needs Flathub manifest refresh), and macOS DMG are follow-ups.
+# Phase 1 of #212 - unsigned Windows MSIX, tag-triggered. Builds via
+# PyInstaller + makeappx.exe. The default (slim) build ships no models -
+# they download on first run (#226). Installers are distributed as
+# workflow artifacts (they exceed the 2 GiB release-asset limit, see
+# #229); the GitHub release carries the sha256 checksums for
+# verification. Signing (#211), Flatpak (needs Flathub manifest
+# refresh), and macOS DMG are follow-ups.
 
 on:
   push:
@@ -14,6 +18,10 @@ on:
         description: "Version string for test builds (e.g. 0.0.0-test); tag-triggered runs derive this from the tag"
         required: false
         default: "0.0.0-test"
+      bundle_models:
+        description: "Bake required models into the MSIX (~4.4 GB instead of ~2.9 GB) - for offline installs and MS Store submissions"
+        type: boolean
+        default: false
 
 permissions:
   contents: write  # required for `gh release create`
@@ -38,6 +46,14 @@ jobs:
             version="${{ inputs.test_version }}"
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Bundled builds get a distinct filename + checksums file so both
+          # variants of one version can sit on the same release without
+          # colliding (dispatch runs can target a tag ref).
+          if [[ "${{ inputs.bundle_models }}" == "true" ]]; then
+            echo "suffix=-bundled" >> "$GITHUB_OUTPUT"
+          else
+            echo "suffix=" >> "$GITHUB_OUTPUT"
+          fi
           echo "Resolved version: $version"
 
       - name: Set up uv
@@ -53,13 +69,13 @@ jobs:
           uv pip install pyinstaller
 
       - name: Pre-populate required models from Flatpak-hosted tarballs
-        # aTrain resolves REQUIRED_MODELS_DIR to a path inside the installed
-        # aTrain package, which lands under read-only WindowsApps once
-        # installed. Any runtime `os.makedirs()` there raises PermissionError
-        # and blocks page render. Baking the models in at build time makes
-        # the dir already-exist, so os.makedirs is a no-op.
+        # Optional since #226: without bundled models the app downloads them
+        # to the writable models dir on first run. Bundling stays available
+        # behind the flag for offline installs and MS Store submissions
+        # (tag-triggered runs have no inputs, so they default to slim).
         # Source: the same sha256-pinned tarballs the Flatpak build uses
         # (flathub/io.github.juergenfleiss.aTrain), not gated.
+        if: inputs.bundle_models
         shell: bash
         run: |
           mkdir -p aTrain/required_models
@@ -113,7 +129,7 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
-          $output = "aTrain-$version.msix"
+          $output = "aTrain-$version${{ steps.version.outputs.suffix }}.msix"
           # makeappx.exe ships with the Windows SDK preinstalled on
           # windows-latest runners; the path can shift between SDK versions
           # so glob the newest one under the standard install root.
@@ -126,13 +142,49 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "makeappx failed with exit code $LASTEXITCODE" }
           Write-Host "Built $output"
 
+      - name: Generate sha256 checksums
+        shell: bash
+        run: |
+          sha256sum aTrain-*.msix > "checksums${{ steps.version.outputs.suffix }}.txt"
+          cat "checksums${{ steps.version.outputs.suffix }}.txt"
+
       - name: Upload MSIX artifact
-        # Distributes via workflow artifacts (10 GB per-file limit).
-        # GitHub release attachment is blocked because the ~4 GB bundle
-        # exceeds the 2 GB per-asset limit. Distribution channel is a
-        # follow-up decision.
+        # Always uploaded as workflow artifact - the only GitHub channel
+        # the installers fit in (releases cap assets at 2 GiB).
         uses: actions/upload-artifact@v4
         with:
-          name: aTrain-msix-${{ steps.version.outputs.version }}
-          path: aTrain-*.msix
+          name: aTrain-msix-${{ steps.version.outputs.version }}${{ steps.version.outputs.suffix }}
+          path: |
+            aTrain-*.msix
+            checksums*.txt
           if-no-files-found: error
+
+      - name: Attach checksums to the GitHub release
+        # The release is the integrity anchor, not the download channel:
+        # the MSIX itself exceeds GitHub's 2 GiB per-asset limit, so
+        # consumers fetch it from the workflow artifact / an external
+        # download and verify it against the sha256 published here.
+        # Signing material (#211) and the SBOM (#213) attach to the same
+        # anchor later.
+        # Two flows are supported:
+        # - release created via the GitHub UI (creates the tag on publish,
+        #   which triggers this run): upload to the existing release.
+        # - tag pushed by hand: create a draft release so maintainers write
+        #   notes and publish deliberately.
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          checksums="checksums${{ steps.version.outputs.suffix }}.txt"
+          if gh release view "v$version" > /dev/null 2>&1; then
+            gh release upload "v$version" "$checksums" --clobber
+          else
+            gh release create "v$version" \
+              --draft \
+              --verify-tag \
+              --title "aTrain v$version" \
+              --generate-notes \
+              "$checksums"
+          fi
