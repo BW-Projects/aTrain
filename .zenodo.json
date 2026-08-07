@@ -8,7 +8,7 @@
     { "name": "Kowald, Dominik", "affiliation": "Know-Center Graz" },
     { "name": "Thalmann, Stefan", "affiliation": "University of Graz" }
   ],
-  "license": "agpl-3.0-or-later",
+  "license": "AGPL-3.0-or-later",
   "access_right": "open",
   "keywords": [
     "transcription",
