@@ -7,6 +7,12 @@
 # Usage:
 #   zenodo-upload.sh <version> <file>...
 #
+# One invocation per release: it clears the draft's files before uploading,
+# so a second invocation for the same version would remove what the first one
+# uploaded. Once more artifact types exist (EXE #221, Flatpak), collect them
+# in a single publish job and pass them all to one invocation, rather than
+# calling this once per build job.
+#
 # Environment:
 #   ZENODO_TOKEN        (required) personal access token, scope deposit:write
 #   ZENODO_BASE         (required) https://zenodo.org or https://sandbox.zenodo.org
@@ -82,7 +88,12 @@ if [[ -n "${ZENODO_CONCEPT_ID:-}" ]]; then
   else
     # `newversion` needs the latest published version's id;
     # /records/<concept> redirects there.
-    latest="$(curl -sSL --fail-with-body "$ZENODO_BASE/api/records/$ZENODO_CONCEPT_ID" | jqr '.id // empty')"
+    # `if cmd` rather than a plain assignment: under `set -e` a failing curl
+    # would abort before the check below could report anything useful.
+    latest=""
+    if concept_record="$(curl -sSL --fail-with-body "$ZENODO_BASE/api/records/$ZENODO_CONCEPT_ID" 2>/dev/null)"; then
+      latest="$(jqr '.id // empty' <<<"$concept_record")"
+    fi
     if [[ -z "$latest" ]]; then
       echo "::error::ZENODO_CONCEPT_ID=$ZENODO_CONCEPT_ID does not resolve to a published record."
       exit 1

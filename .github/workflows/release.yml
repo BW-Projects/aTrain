@@ -30,6 +30,9 @@ jobs:
   build-windows-msix:
     name: Build Windows MSIX (unsigned)
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      suffix: ${{ steps.version.outputs.suffix }}
     # Build ~13 min, plus ~13 min to push the 2.9 GB installer to Zenodo -
     # too close to the previous 30 min limit to absorb network variance.
     timeout-minutes: 60
@@ -163,25 +166,56 @@ jobs:
           # An MSIX is already a zip - re-compressing 2.9 GB buys nothing.
           compression-level: 0
 
+  publish:
+    name: Publish release artifacts
+    # Fan-in: the build jobs only produce artifacts, everything that talks to
+    # the outside world (GitHub release, Zenodo, signing later) happens here -
+    # once per release, with all artifacts in hand. Adding the EXE (#221) or
+    # Flatpak means adding a build job and listing it in `needs`.
+    needs: build-windows-msix
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: aTrain-*-${{ needs.build-windows-msix.outputs.version }}${{ needs.build-windows-msix.outputs.suffix }}
+          path: artifacts
+          merge-multiple: true
+
+      - name: Generate sha256 checksums
+        # Recomputed over the downloaded installers rather than reused from the
+        # build job, so the checksums also cover the artifact round-trip. One
+        # line per installer, so a consumer can verify a single download with
+        # `sha256sum -c checksums.txt --ignore-missing`.
+        working-directory: artifacts
+        run: |
+          checksums="checksums${{ needs.build-windows-msix.outputs.suffix }}.txt"
+          sha256sum aTrain-* > "$checksums"
+          cat "$checksums"
+
       - name: Attach checksums to the GitHub release
-        # The release is the integrity anchor, not the download channel:
-        # the MSIX itself exceeds GitHub's 2 GiB per-asset limit, so
-        # consumers fetch it from the workflow artifact / an external
-        # download and verify it against the sha256 published here.
-        # Signing material (#211) and the SBOM (#213) attach to the same
-        # anchor later.
+        # The release is the integrity anchor, not the download channel: the
+        # installers exceed GitHub's 2 GiB per-asset limit, so consumers fetch
+        # them from Zenodo (#229) or the workflow artifact and verify them
+        # against the sha256 published here. Signing material (#211) and the
+        # SBOM (#213) attach to the same anchor later.
         # Two flows are supported:
         # - release created via the GitHub UI (creates the tag on publish,
         #   which triggers this run): upload to the existing release.
         # - tag pushed by hand: create a draft release so maintainers write
         #   notes and publish deliberately.
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: bash
+        working-directory: artifacts
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version="${{ steps.version.outputs.version }}"
-          checksums="checksums${{ steps.version.outputs.suffix }}.txt"
+          version="${{ needs.build-windows-msix.outputs.version }}"
+          checksums="checksums${{ needs.build-windows-msix.outputs.suffix }}.txt"
           if gh release view "v$version" > /dev/null 2>&1; then
             gh release upload "v$version" "$checksums" --clobber
           else
@@ -193,13 +227,13 @@ jobs:
               "$checksums"
           fi
 
-      - name: Upload installer to Zenodo (draft)
-        # Zenodo is the download channel for the installer (#229). Creates a
+      - name: Upload installers to Zenodo (draft)
+        # Zenodo is the download channel for the installers (#229). Creates a
         # DRAFT only - a maintainer publishes it in the Zenodo UI, which also
-        # submits it to the community. Slim tag builds only.
+        # submits it to the community. Slim builds only: the bundled variant
+        # is an internal build, not a published release artifact.
         # The script is runnable locally, see `zenodo-upload.sh --help`.
-        if: startsWith(github.ref, 'refs/tags/v') && !inputs.bundle_models
-        shell: bash
+        if: ${{ !inputs.bundle_models }}
         env:
           ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
           # No default on purpose: production vs sandbox is an explicit choice.
@@ -212,5 +246,5 @@ jobs:
             echo "::notice::No ZENODO_TOKEN configured - skipping the Zenodo upload."
             exit 0
           fi
-          version="${{ steps.version.outputs.version }}"
-          .github/scripts/zenodo-upload.sh "$version" "aTrain-$version.msix" checksums.txt
+          version="${{ needs.build-windows-msix.outputs.version }}"
+          .github/scripts/zenodo-upload.sh "$version" artifacts/aTrain-*.msix artifacts/checksums.txt
