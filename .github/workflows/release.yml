@@ -188,6 +188,16 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: Add the source archive
+        # Keeps the record self-contained: the exact sources the installers
+        # were built from live next to them, at the same immutable place.
+        working-directory: artifacts
+        run: |
+          version="${{ needs.build-windows-msix.outputs.version }}"
+          curl -sSL --fail-with-body -o "aTrain-$version-source.tar.gz" \
+            "https://github.com/$GITHUB_REPOSITORY/archive/refs/tags/v$version.tar.gz"
+          ls -la
+
       - name: Generate sha256 checksums
         # Recomputed over the downloaded installers rather than reused from the
         # build job, so the checksums also cover the artifact round-trip. One
@@ -247,4 +257,4 @@ jobs:
             exit 0
           fi
           version="${{ needs.build-windows-msix.outputs.version }}"
-          .github/scripts/zenodo-upload.sh "$version" artifacts/aTrain-*.msix artifacts/checksums.txt
+          .github/scripts/zenodo-upload.sh "$version" artifacts/aTrain-* artifacts/checksums.txt
