@@ -30,7 +30,9 @@ jobs:
   build-windows-msix:
     name: Build Windows MSIX (unsigned)
     runs-on: windows-latest
-    timeout-minutes: 30
+    # Build ~13 min, plus ~13 min to push the 2.9 GB installer to Zenodo -
+    # too close to the previous 30 min limit to absorb network variance.
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -158,6 +160,90 @@ jobs:
             aTrain-*.msix
             checksums*.txt
           if-no-files-found: error
+
+      - name: Upload installer to Zenodo (draft)
+        # Zenodo is the download channel for the installer (#229). Creates a
+        # DRAFT only - a maintainer publishes it in the Zenodo UI, which also
+        # submits it to the community. Slim tag builds only.
+        if: startsWith(github.ref, 'refs/tags/v') && !inputs.bundle_models
+        shell: bash
+        env:
+          # The no-token skip lives in the script: `secrets` is unavailable in
+          # step `if` conditions, and the token stays scoped to this step.
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+          # Set to https://sandbox.zenodo.org to rehearse without real records.
+          ZENODO_BASE: ${{ vars.ZENODO_BASE || 'https://zenodo.org' }}
+          # The published record's `conceptrecid`, set once: every later
+          # release is then added as a new version of that record.
+          ZENODO_CONCEPT_ID: ${{ vars.ZENODO_CONCEPT_ID }}
+        run: |
+          if [[ -z "${ZENODO_TOKEN:-}" ]]; then
+            echo "::notice::No ZENODO_TOKEN configured - skipping the Zenodo upload."
+            exit 0
+          fi
+
+          version="${{ steps.version.outputs.version }}"
+          msix="aTrain-$version.msix"
+          checksums="checksums.txt"
+
+          api() {  # api <method> <path-or-url> [curl args...]
+            local method="$1" url="$2"; shift 2
+            [[ "$url" == http* ]] || url="$ZENODO_BASE/api$url"
+            curl -sS --fail-with-body -X "$method" \
+              -H "Authorization: Bearer $ZENODO_TOKEN" "$@" "$url"
+          }
+
+          if [[ -n "${ZENODO_CONCEPT_ID:-}" ]]; then
+            # An unpublished draft blocks `newversion`, so reuse it - this
+            # release supersedes it anyway.
+            pending="$(api GET "/deposit/depositions?q=conceptrecid:$ZENODO_CONCEPT_ID&status=draft&size=1" | jq -r '.[0].id // empty')"
+            if [[ -n "$pending" ]]; then
+              echo "::warning::Zenodo draft $pending was still unpublished - reusing it for $version."
+              deposition="$(api GET "/deposit/depositions/$pending")"
+            else
+              # `newversion` needs the latest published version's id;
+              # /records/<concept> redirects there.
+              latest="$(curl -sSL "$ZENODO_BASE/api/records/$ZENODO_CONCEPT_ID" | jq -r .id)"
+              echo "adding a new version to concept $ZENODO_CONCEPT_ID (latest published: $latest)"
+              draft_url="$(api POST "/deposit/depositions/$latest/actions/newversion" | jq -r .links.latest_draft)"
+              deposition="$(api GET "$draft_url")"
+            fi
+            # Either way the draft carries the previous version's files.
+            # `tr -d '\r'`: jq on Windows emits CRLF, and the CR would survive
+            # word splitting into the request URL.
+            draft_id="$(jq -r .id <<<"$deposition")"
+            for file_id in $(jq -r '.files[]?.id' <<<"$deposition" | tr -d '\r'); do
+              api DELETE "/deposit/depositions/$draft_id/files/$file_id" -o /dev/null
+            done
+          else
+            echo "no ZENODO_CONCEPT_ID set - creating the first record of a new concept"
+            deposition="$(api POST /deposit/depositions -H 'Content-Type: application/json' -d '{}')"
+          fi
+          id="$(jq -r .id <<<"$deposition")"
+          bucket="$(jq -r .links.bucket <<<"$deposition")"
+
+          # Bucket API: 50 GB per file. The legacy files endpoint caps at 100 MB.
+          for file in "$msix" "$checksums"; do
+            echo "uploading $file ($(du -h "$file" | cut -f1))"
+            api PUT "$bucket/$file" --upload-file "$file" -o /dev/null \
+              -w "  http=%{http_code} in %{time_total}s\n"
+          done
+
+          # Record metadata lives in .zenodo.json, maintained next to
+          # CITATION.cff; only the per-release bits are added here.
+          jq --arg v "$version" --arg repo "$GITHUB_REPOSITORY" '{metadata: (. + {
+            version: $v,
+            related_identifiers: (.related_identifiers + [{
+              identifier: "https://github.com/\($repo)/releases/tag/v\($v)",
+              relation: "isSupplementTo", scheme: "url"}])
+          })}' .zenodo.json > metadata.json
+          api PUT "/deposit/depositions/$id" -H 'Content-Type: application/json' \
+            -d @metadata.json -o /dev/null -w "metadata http=%{http_code}\n"
+
+          echo "::notice::Zenodo draft ready for review: $ZENODO_BASE/uploads/$id"
+          if [[ -z "${ZENODO_CONCEPT_ID:-}" ]]; then
+            echo "::notice::First record - after publishing it, set the repo variable ZENODO_CONCEPT_ID to its concept id so later releases attach as new versions."
+          fi
 
       - name: Attach checksums to the GitHub release
         # The release is the integrity anchor, not the download channel:
