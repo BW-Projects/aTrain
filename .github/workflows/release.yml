@@ -4,9 +4,9 @@ name: Release
 # PyInstaller + makeappx.exe. The default (slim) build ships no models -
 # they download on first run (#226). Installers are distributed as
 # workflow artifacts (they exceed the 2 GiB release-asset limit, see
-# #229); the GitHub release carries the sha256 checksums for
-# verification. Signing (#211), Flatpak (needs Flathub manifest
-# refresh), and macOS DMG are follow-ups.
+# #229); the GitHub release carries the sha256 checksums and the
+# CycloneDX SBOM (#213) for verification. Signing (#211), Flatpak (needs
+# Flathub manifest refresh), and macOS DMG are follow-ups.
 
 on:
   push:
@@ -25,6 +25,14 @@ on:
 
 permissions:
   contents: write  # required for `gh release create`
+
+env:
+  # Pinned like every other input to the build: a new release of the generator
+  # could otherwise change the SBOM, or break the step, in the middle of a
+  # release. Declared here rather than on the build job so that the Flatpak
+  # (#238) and macOS (#239) jobs inherit one version instead of copying it.
+  CYCLONEDX_BOM: "cyclonedx-bom==7.3.1"
+  CYCLONEDX_LIB: "cyclonedx-python-lib[json-validation]==11.12.0"
 
 jobs:
   build-windows-msix:
@@ -67,11 +75,12 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Install the full app runtime + PyInstaller
+      - name: Install the full app runtime
+        # --no-dev because the dev group (ruff, bandit, pip-audit) has no place
+        # in a release build, and because it would otherwise be inventoried as
+        # part of the shipped application by the SBOM step below.
         shell: bash
-        run: |
-          uv sync --locked --extra gui
-          uv pip install pyinstaller
+        run: uv sync --locked --extra gui --no-dev
 
       - name: Pre-populate required models from Flatpak-hosted tarballs
         # Optional since #226: without bundled models the app downloads them
@@ -103,6 +112,38 @@ jobs:
 
           echo "Populated required_models:"
           ls -la
+
+      - name: Generate the SBOM
+        # #213. Runs against the venv while it holds exactly the shipped
+        # runtime: after the locked sync, and before PyInstaller is installed
+        # into it.
+        # cyclonedx-bom runs via uvx for the same reason: installed into the
+        # venv it would inventory itself.
+        shell: bash
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          suffix="${{ steps.version.outputs.suffix }}"
+          # Read the bundled models off the package tree the previous step
+          # built, so the SBOM records what this artifact actually carries
+          # rather than a list repeated here.
+          bundled=""
+          if [[ -d aTrain/required_models ]]; then
+            bundled="$(ls aTrain/required_models | tr '\n' ',' | sed 's/,$//')"
+          fi
+          uvx --from "$CYCLONEDX_BOM" cyclonedx-py environment .venv \
+            --output-format JSON --output-file raw-sbom.json
+          uv run --no-project --with "$CYCLONEDX_LIB" \
+            python .github/scripts/build-sbom.py \
+              --input raw-sbom.json \
+              --output "aTrain-$version$suffix-windows.cdx.json" \
+              --version "$version" \
+              --platform windows \
+              --bundled-models "$bundled" \
+              --validate
+
+      - name: Install PyInstaller
+        shell: bash
+        run: uv pip install pyinstaller
 
       - name: Build the frozen app with PyInstaller
         shell: bash
@@ -161,6 +202,7 @@ jobs:
           name: aTrain-msix-${{ steps.version.outputs.version }}${{ steps.version.outputs.suffix }}
           path: |
             aTrain-*.msix
+            aTrain-*.cdx.json
             checksums*.txt
           if-no-files-found: error
           # An MSIX is already a zip - re-compressing 2.9 GB buys nothing.
@@ -199,9 +241,10 @@ jobs:
           ls -la
 
       - name: Generate sha256 checksums
-        # Recomputed over the downloaded installers rather than reused from the
+        # Recomputed over the downloaded files rather than reused from the
         # build job, so the checksums also cover the artifact round-trip. One
-        # line per installer, so a consumer can verify a single download with
+        # line per file - installers, source archive and SBOMs alike - so a
+        # consumer can verify a single download with
         # `sha256sum -c checksums.txt --ignore-missing`.
         working-directory: artifacts
         run: |
@@ -209,12 +252,13 @@ jobs:
           sha256sum aTrain-* > "$checksums"
           cat "$checksums"
 
-      - name: Attach checksums to the GitHub release
+      - name: Attach checksums and SBOMs to the GitHub release
         # The release is the integrity anchor, not the download channel: the
         # installers exceed GitHub's 2 GiB per-asset limit, so consumers fetch
         # them from Zenodo (#229) or the workflow artifact and verify them
-        # against the sha256 published here. Signing material (#211) and the
-        # SBOM (#213) attach to the same anchor later.
+        # against the sha256 published here. The SBOMs (#213) sit next to them,
+        # small enough to read without downloading a 2.9 GB installer first;
+        # signing material (#211) attaches to the same anchor later.
         # Two flows are supported:
         # - release created via the GitHub UI (creates the tag on publish,
         #   which triggers this run): upload to the existing release.
@@ -227,14 +271,14 @@ jobs:
           version="${{ needs.build-windows-msix.outputs.version }}"
           checksums="checksums${{ needs.build-windows-msix.outputs.suffix }}.txt"
           if gh release view "v$version" > /dev/null 2>&1; then
-            gh release upload "v$version" "$checksums" --clobber
+            gh release upload "v$version" "$checksums" aTrain-*.cdx.json --clobber
           else
             gh release create "v$version" \
               --draft \
               --verify-tag \
               --title "aTrain v$version" \
               --generate-notes \
-              "$checksums"
+              "$checksums" aTrain-*.cdx.json
           fi
 
       - name: Upload installers to Zenodo (draft)
@@ -242,6 +286,8 @@ jobs:
         # DRAFT only - a maintainer publishes it in the Zenodo UI, which also
         # submits it to the community. Slim builds only: the bundled variant
         # is an internal build, not a published release artifact.
+        # The `aTrain-*` glob carries the SBOM into the record as well, so the
+        # archived version stays readable without the GitHub release next to it.
         # The script is runnable locally, see `zenodo-upload.sh --help`.
         if: ${{ !inputs.bundle_models }}
         env:
