@@ -189,9 +189,12 @@ jobs:
           Write-Host "Built $output"
 
       - name: Generate sha256 checksums
+        # Covers everything the workflow artifact carries, the SBOM included -
+        # the release gets its own set, recomputed after the round-trip.
         shell: bash
         run: |
-          sha256sum aTrain-*.msix > "checksums${{ steps.version.outputs.suffix }}.txt"
+          sha256sum aTrain-*.msix aTrain-*.cdx.json \
+            > "checksums${{ steps.version.outputs.suffix }}.txt"
           cat "checksums${{ steps.version.outputs.suffix }}.txt"
 
       - name: Upload MSIX artifact

@@ -64,11 +64,13 @@ def models():
         "tiny": {
             "repo_id": "aTrain-core/faster-whisper-tiny",
             "revision": "67ab6c7e",
+            "license": "MIT",
             "repo_size_human": "75.54 MB",
         },
         "speaker-detection": {
             "repo_id": "aTrain-core/speaker-detection",
             "revision": "027e7a80",
+            "license": "CC-BY-4.0",
             "repo_size_human": "32.1 MB",
         },
     }
@@ -178,6 +180,23 @@ def test_bundled_models_are_told_apart_from_downloaded_ones(models):
     assert delivery == {"speaker-detection": "bundled", "faster-whisper-tiny": "on-demand"}
 
 
+def test_a_downloaded_model_is_scoped_optional_and_a_bundled_one_required(models):
+    # `atrain:model:delivery` is ours and invisible to a consumer's tooling.
+    # Without `scope`, a slim installer reads as one that ships 20 GB of models.
+    scope = {
+        component["name"]: component["scope"]
+        for component in build_sbom.model_components(models, bundled={"speaker-detection"})
+    }
+
+    assert scope == {"speaker-detection": "required", "faster-whisper-tiny": "optional"}
+
+
+def test_the_model_licence_is_the_one_models_json_pins(models):
+    tiny = next(c for c in build_sbom.model_components(models, set()) if "tiny" in c["name"])
+
+    assert tiny["licenses"] == [{"license": {"id": "MIT", "acknowledgement": "declared"}}]
+
+
 # --- the shipped models.json -----------------------------------------------
 
 
@@ -191,6 +210,15 @@ def test_the_real_models_file_produces_a_component_for_every_model():
     for component in components:
         assert component["purl"].startswith("pkg:huggingface/aTrain-core/")
         assert component["version"]
+
+
+def test_every_shipped_model_declares_a_licence():
+    # The models are the only part of the release no other tool inventories,
+    # so a model added without a licence has to fail here rather than reach a
+    # release as the one component that states nothing about its terms.
+    models = json.loads(build_sbom.MODELS_JSON.read_text())
+
+    assert all(model.get("license") for model in models.values())
 
 
 # --- the assembled document ------------------------------------------------
@@ -229,6 +257,46 @@ def test_a_root_without_recorded_edges_still_gets_the_models(tmp_path, raw_sbom,
     result = json.loads(output.read_text())
     graph = {e["ref"]: e["dependsOn"] for e in result["dependencies"]}
     assert len(graph["aTrain==1.5.0"]) == len(json.loads(build_sbom.MODELS_JSON.read_text()))
+
+
+def test_the_document_names_its_supplier_and_its_author(tmp_path, raw_sbom, monkeypatch):
+    # cyclonedx records only itself, under `metadata.tools`, which answers
+    # "produced by which tool", not "by whom".
+    output, argv = build(tmp_path, raw_sbom)
+    monkeypatch.setattr("sys.argv", ["build-sbom.py", *argv])
+
+    build_sbom.main()
+
+    metadata = json.loads(output.read_text())["metadata"]
+    assert metadata["supplier"]["name"] == "aTrain project"
+    assert metadata["authors"] == [{"name": "aTrain project"}]
+
+
+def test_an_input_of_another_spec_version_is_refused(tmp_path, raw_sbom, monkeypatch):
+    # The generator writes the newest version it supports, and --validate does
+    # not check: the 1.6 schema accepts a document labelled 1.5.
+    raw_sbom["specVersion"] = "1.5"
+    output, argv = build(tmp_path, raw_sbom)
+    monkeypatch.setattr("sys.argv", ["build-sbom.py", *argv])
+
+    with pytest.raises(SystemExit) as excinfo:
+        build_sbom.main()
+    assert "1.5" in str(excinfo.value)
+    assert not output.exists()
+
+
+def test_a_model_without_a_licence_is_refused(tmp_path, raw_sbom, models, monkeypatch):
+    del models["tiny"]["license"]
+    models_json = tmp_path / "models.json"
+    models_json.write_text(json.dumps(models))
+    monkeypatch.setattr(build_sbom, "MODELS_JSON", models_json)
+    output, argv = build(tmp_path, raw_sbom)
+    monkeypatch.setattr("sys.argv", ["build-sbom.py", *argv])
+
+    with pytest.raises(SystemExit) as excinfo:
+        build_sbom.main()
+    assert "tiny" in str(excinfo.value)
+    assert not output.exists()
 
 
 def test_an_unknown_bundled_model_is_refused(tmp_path, raw_sbom, monkeypatch):
