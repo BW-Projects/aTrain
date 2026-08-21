@@ -14,7 +14,7 @@ who prefer a virtual-environment install.
 
 - **Flathub (recommended):** https://flathub.org/apps/io.github.juergenfleiss.aTrain
 - A `.deb` file for beta 1.2.1 is available on the
-  [university download page](https://business-analytics.uni-graz.at/de/forschen/atrain/download/).
+  [university download page](https://business-analytics.uni-graz.at/de/forschung/atrain/download/).
 
 ## Manual setup on Ubuntu / Debian
 
