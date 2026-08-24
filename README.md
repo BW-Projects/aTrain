@@ -42,7 +42,7 @@ aTrain-core can process speech recordings a total of 99 languages, including Afr
 \
 **MAXQDA, ATLAS.ti and nVivo compatible output 📄**
 \
-aTrain-core provides transcription files that are seamlessly importable into the most popular tools for qualitative analysis, ATLAS.ti, MAXQDA and nVivo. This allows you to directly play audio for the corresponding text segment by clicking on its timestamp. Go to the [tutorial](https://github.com/BANDAS-Center/aTrain/wiki/Tutorials) for MAXQDA.
+aTrain-core provides transcription files that are seamlessly importable into the most popular tools for qualitative analysis, ATLAS.ti, MAXQDA and nVivo. This allows you to directly play audio for the corresponding text segment by clicking on its timestamp. Go to the [tutorial](docs/tutorials.md) for MAXQDA and NVivo.
 \
 \
 **Nvidia GPU support 🖥️**
@@ -148,10 +148,19 @@ Planned in the near future.
 - Allowing users to setting the output directory
 - Allow for saving settings and defaults (currently resets after each transcription)  **Implemented in v1.4.0
 
+## Documentation
+
+Full user documentation lives in [`docs/`](docs/README.md):
+
+- [Installation (end users)](docs/installation.md) — packaged apps and pip.
+- [Linux installation](docs/installation-linux.md) — manual Ubuntu / Debian setup.
+- [Tutorials](docs/tutorials.md) — importing aTrain output into MAXQDA and NVivo.
+
 ## For contributors
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup. aTrain
-uses [uv](https://docs.astral.sh/uv/) as its recommended package manager.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup, building a
+standalone executable, and the branching model. aTrain uses
+[uv](https://docs.astral.sh/uv/) as its recommended package manager.
 
 ## Attribution
 The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/).
