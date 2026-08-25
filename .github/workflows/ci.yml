@@ -274,18 +274,19 @@ jobs:
 
       - name: Install unit-test deps (no torch, no GTK)
         # The unit tests cover only torch- and NiceGUI-free helpers
-        # (aTrain/utils/archive.py), so we skip the heavy app runtime entirely.
+        # (aTrain/utils/archive.py, aTrain_core/integrity.py and the model
+        # resolution around it), so we skip the heavy app runtime entirely.
         # Post-monorepo-merge aTrain_core ships inside this wheel; `--no-deps .`
         # installs both top-level packages without pulling torch/pyannote, plus
-        # the few light libraries archive.py / aTrain_core.globals import, plus
-        # pytest. Stays in seconds.
+        # the few light libraries those modules import, plus pytest. All of it
+        # is pure Python and stays in seconds.
         # `shell: bash` so the `\` line-continuations work on windows-latest too
         # (default Windows shell is pwsh, which uses backtick instead).
         shell: bash
         run: |
           uv venv
           uv pip install --no-deps .
-          uv pip install platformdirs pyyaml show-in-file-manager pytest
+          uv pip install platformdirs pyyaml show-in-file-manager huggingface_hub pytest
 
       - name: Run unit tests
         # `uv run --no-sync` finds the venv we just built and invokes python
