@@ -73,7 +73,11 @@ async def run_pipeline(payload: UploadPayload):
     with Manager() as manager, TemporaryDirectory() as tmp_dir:
         progress = manager.dict({"task": "Prepare", "current": 0, "total": 999999})
         dialog_process(progress)
-        state = cast(State, app.storage.general)
+        # Snapshot rather than read live: the page re-renders while the upload is
+        # staged, and `get_model_options` resets `model` to None whenever no model
+        # is on disk yet. Reading through to the live storage would also let a user
+        # switching the model mid-upload retarget a run that is already under way.
+        state = cast(State, dict(app.storage.general))
         try:
             device = Device.GPU if state.get("GPU") else Device.CPU
             # Validate first: it needs nothing but the name and the settings, and
