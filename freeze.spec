@@ -63,7 +63,17 @@ a = Analysis(
 # newer copy for every DLL loaded afterwards - including torch's c10.dll,
 # whose DllMain then fails with WinError 1114 and takes the app down before
 # the UI appears. Drop it so the system runtime is used, as in aTrain <=1.4.1.
-a.binaries = [b for b in a.binaries if os.path.basename(b[0]).lower() != "msvcp140.dll"]
+# Matched on the source path, not just the file name: no dependency ships a
+# runtime we need today (torch's Windows wheel carries none), but one that
+# started to would otherwise be dropped here without a trace.
+a.binaries = [
+    b
+    for b in a.binaries
+    if not (
+        os.path.basename(b[0]).lower() == "msvcp140.dll"
+        and "sklearn" in (b[1] or "").lower()
+    )
+]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
