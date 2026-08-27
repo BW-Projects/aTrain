@@ -54,7 +54,7 @@ source atrain_venv/bin/activate
 Install aTrain (with the GUI extras) from the GitHub repository:
 
 ```bash
-pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git@develop"
+pip install "aTrain[gui] @ git+https://github.com/aTrainTranscription/aTrain.git@develop"
 ```
 
 On Linux the PyPI PyTorch wheel already bundles CUDA, so no extra package index

@@ -85,9 +85,9 @@ To build your own package:
 Clone and install aTrain in **editable mode**:
 
 ```bash
-git clone https://github.com/JuergenFleiss/aTrain.git
+git clone https://github.com/aTrainTranscription/aTrain.git
 cd aTrain
-pip install -e ".[gui]" --extra-index-url https://download.pytorch.org/whl/cu130
+pip install -e ".[gui]" --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 Download ffmpeg and all required models from Whisper and pyannote.audio:

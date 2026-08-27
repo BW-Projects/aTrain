@@ -20,7 +20,7 @@ Additional download types are listed on the
 
 ## Install from source with pip
 
-You need **Python ≥ 3.10**.
+You need **Python ≥ 3.11**.
 
 Set up and activate a virtual environment:
 
@@ -36,15 +36,15 @@ Install aTrain with the GUI extras (needed for `aTrain start`, the desktop /
 browser app):
 
 ```bash
-pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git"
+pip install "aTrain[gui] @ git+https://github.com/aTrainTranscription/aTrain.git"
 ```
 
 On **Windows**, prepend the PyTorch CUDA index so pip pulls the CUDA torch
 wheel:
 
 ```bash
-pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git" \
-    --extra-index-url https://download.pytorch.org/whl/cu130
+pip install "aTrain[gui] @ git+https://github.com/aTrainTranscription/aTrain.git" \
+    --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 On **Linux** the PyPI torch wheel already bundles CUDA. **macOS** is CPU-only.
