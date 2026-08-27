@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from importlib.resources import files
 from multiprocessing.managers import DictProxy
@@ -40,10 +41,13 @@ def update_progress(progress: DictProxy, start_time: datetime):
     state = app.storage.general
     try:
         current, total, task = progress["current"], progress["total"], progress["task"]
-    except (EOFError, ConnectionError, FileNotFoundError):
+    except (EOFError, ConnectionError, FileNotFoundError) as e:
         # The manager process backing `progress` dies while a cancelled
         # transcription tears down; a late timer tick would otherwise log a
         # pseudo-crash (BrokenPipeError) right before the timer is cancelled.
+        # Log it: if the manager dies for any *other* reason the dialog would
+        # otherwise freeze on stale storage values with no trace at all.
+        logging.getLogger(__name__).debug("progress proxy unavailable: %r", e)
         return
     state["progress"] = current / total
     state["task"] = task
