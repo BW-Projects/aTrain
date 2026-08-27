@@ -79,3 +79,69 @@ async def test_delete_button_invokes_remove_model(mocked_models, user: User):
     # Exactly one row is downloaded → exactly one "Delete" button.
     user.find("Delete").click()
     assert remove_calls == ["large-v1"]
+
+
+@pytest.fixture
+def model_dirs(monkeypatch, tmp_path):
+    """Switch the page between a bundled and a slim build.
+
+    Patched on aTrain_core.globals only: the page calls `is_packaged_model`,
+    which resolves the dirs at call time from that module's namespace. The
+    constants themselves would need patching once per importing module.
+    """
+    import aTrain_core.globals as core_globals
+
+    def _set(packaged: bool):
+        models = tmp_path / "models"
+        models.mkdir(exist_ok=True)
+        required = tmp_path / "packaged" if packaged else models
+        if packaged:
+            (required / "large-v3-turbo").mkdir(parents=True)
+        monkeypatch.setattr(core_globals, "MODELS_DIR", models)
+        monkeypatch.setattr(core_globals, "REQUIRED_MODELS_DIR", required)
+        return core_globals
+
+    return _set
+
+
+def _metadata_with_turbo():
+    return [
+        {"model": "large-v3-turbo", "size": "1.6 GB", "downloaded": False},
+        {"model": "tiny", "size": "75 MB", "downloaded": False},
+    ]
+
+
+@pytest.fixture
+def turbo_metadata(monkeypatch):
+    """Pin the model list the page sees.
+
+    A fixture, not an in-test patch: the page binds `read_model_metadata` at
+    import time and tests/ui/main.py re-imports it inside the `user` fixture,
+    so patching from the test body lands too late. `model_dirs` can patch from
+    the body because `is_packaged_model` resolves the dirs on every call.
+    """
+    monkeypatch.setattr(models_utils, "read_model_metadata", _metadata_with_turbo)
+
+
+async def test_bundled_model_is_not_offered_for_download(model_dirs, turbo_metadata, user: User):
+    """A model shipped inside the read-only install dir cannot be managed."""
+    core_globals = model_dirs(packaged=True)
+    assert core_globals.packaged_models_dir() is not None  # precondition
+
+    await user.open("/models")
+    await user.should_see("Model Manager", retries=100)
+    await user.should_see("tiny")
+    await user.should_not_see("large-v3-turbo")
+
+
+async def test_slim_build_offers_the_default_model(model_dirs, turbo_metadata, user: User):
+    """Regression: large-v3-turbo is in REQUIRED_MODELS but slim builds do not
+    ship it, and the transcribe page lists only downloaded models - so hiding it
+    here left the default model unreachable through the UI entirely."""
+    core_globals = model_dirs(packaged=False)
+    assert core_globals.packaged_models_dir() is None  # precondition
+
+    await user.open("/models")
+    await user.should_see("Model Manager", retries=100)
+    await user.should_see("large-v3-turbo")
+    await user.should_see("1.6 GB")
