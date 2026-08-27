@@ -60,6 +60,30 @@ async def test_transcribe_through_ui(user: User):
     await user.should_see("transcribed your file", retries=600)
 
 
+async def test_large_upload_is_staged_from_disk(tmp_path):
+    """The streaming branch, which is the normal one for real recordings.
+
+    NiceGUI hands over a `LargeFileUpload` (a temp file it streamed to) rather
+    than a `SmallFileUpload` (whole file in a bytes buffer) once an upload
+    exceeds `MultiPartParser.spool_max_size` - 1 MB by starlette's default,
+    which every audio file clears. Without this the tests would only ever cover
+    the in-memory branch.
+    """
+    source = tmp_path / "upload.tmp"
+    source.write_bytes(FIXTURE.read_bytes())
+    payload = transcription.UploadPayload(
+        name="recording.mp3",
+        upload=ui.upload.LargeFileUpload(
+            name="recording.mp3", content_type="audio/mpeg", _path=source
+        ),
+    )
+
+    staged = await payload.materialise(tmp_path / "staging", "recording.mp3")
+
+    assert staged.read_bytes() == FIXTURE.read_bytes()
+    assert staged != source
+
+
 async def test_picked_path_reaches_the_pipeline_unchanged(monkeypatch):
     """Native-picker path (Linux/Flatpak): the Start button hands us a path.
 

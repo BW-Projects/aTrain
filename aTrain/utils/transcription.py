@@ -14,9 +14,6 @@ from aTrain_core.settings import ComputeType, Device, Settings, check_inputs_tra
 from nicegui import app, events, run, ui
 from nicegui.run import SubprocessException
 from nicegui.run import setup as setup_process_pool
-from starlette.formparsers import MultiPartParser
-
-MultiPartParser.spool_max_size = 1024 * 1024 * 1024 * 10  # 10 GB file size limit
 
 
 class State(TypedDict):
