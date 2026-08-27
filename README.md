@@ -79,19 +79,19 @@ Until aTrain ships on PyPI, install directly from the GitHub repo. Engine
 only (CLI usage):
 
 ```bash
-pip install "aTrain @ git+https://github.com/JuergenFleiss/aTrain.git"
+pip install "aTrain @ git+https://github.com/aTrainTranscription/aTrain.git"
 ```
 
 For `aTrain start` (the desktop / browser app), add the GUI extras:
 
 ```bash
-pip install "aTrain[gui] @ git+https://github.com/JuergenFleiss/aTrain.git"
+pip install "aTrain[gui] @ git+https://github.com/aTrainTranscription/aTrain.git"
 ```
 
-On Windows, prepend the PyTorch CUDA index for the `cu130` torch wheel:
+On Windows, prepend the PyTorch CUDA index for the `cu128` torch wheel:
 
 ```bash
-pip install ... --extra-index-url https://download.pytorch.org/whl/cu130
+pip install ... --extra-index-url https://download.pytorch.org/whl/cu128
 ```
 
 On Linux the PyPI torch wheel already bundles CUDA; macOS is CPU-only.
