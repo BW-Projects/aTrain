@@ -1,4 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules, copy_metadata
 from importlib.resources import files
 
@@ -56,6 +58,13 @@ a = Analysis(
     cipher=None,
     noarchive=False,
 )
+# scikit-learn's wheel ships msvcp140.dll 14.16 (VS 2017) in sklearn/.libs.
+# PyInstaller collects it into the app root, where it shadows the system's
+# newer copy for every DLL loaded afterwards - including torch's c10.dll,
+# whose DllMain then fails with WinError 1114 and takes the app down before
+# the UI appears. Drop it so the system runtime is used, as in aTrain <=1.4.1.
+a.binaries = [b for b in a.binaries if os.path.basename(b[0]).lower() != "msvcp140.dll"]
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
 exe = EXE(
