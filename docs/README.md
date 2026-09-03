@@ -21,6 +21,8 @@ project overview, badges, and benchmarks, see the [main README](../README.md).
 
 - [Security](security/) — security assessments, e.g. the
   [OWASP Top 10 for LLM Applications assessment](security/owasp-llm-top10-assessment.md).
+- [Code signing policy](code-signing-policy.md) — how release builds are
+  signed, who approves signing requests, and what the app transmits.
 
 ## For contributors
 
