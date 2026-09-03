@@ -18,6 +18,8 @@ source with pip.
 Additional download types are listed on the
 [university download page](https://business-analytics.uni-graz.at/de/forschung/atrain/download/).
 
+How release builds are signed: see the [Code signing policy](code-signing-policy.md).
+
 ## Install from source with pip
 
 You need **Python ≥ 3.11**.

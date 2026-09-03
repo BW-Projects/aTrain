@@ -14,6 +14,8 @@ aTrain is a tool for automatically transcribing speech recordings utilizing stat
 
 aTrain is published on Flathub for Linux and the Microsoft Store for Windows.  Additional download types [can be found here](https://business-analytics.uni-graz.at/de/forschung/atrain/download/).
 
+How release builds are signed: see the [Code signing policy](docs/code-signing-policy.md).
+
 
 ## About aTrain
 
@@ -164,3 +166,5 @@ standalone executable, and the branching model. aTrain uses
 
 ## Attribution
 The GIFs and Icons in aTrain are from [tenor](https://tenor.com/) and [flaticon](https://www.flaticon.com/).
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
