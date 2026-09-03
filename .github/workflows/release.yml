@@ -1,12 +1,13 @@
 name: Release
 
-# Phase 1 of #212 - unsigned Windows MSIX, tag-triggered. Builds via
-# PyInstaller + makeappx.exe. The default (slim) build ships no models -
-# they download on first run (#226). Installers are distributed as
-# workflow artifacts (they exceed the 2 GiB release-asset limit, see
-# #229); the GitHub release carries the sha256 checksums and the
-# CycloneDX SBOM (#213) for verification. Signing (#211), Flatpak (needs
-# Flathub manifest refresh), and macOS DMG are follow-ups.
+# Tag-triggered Windows MSIX release (#212), Authenticode-signed via
+# SignPath (#211). Builds via PyInstaller + makeappx.exe. The default
+# (slim) build ships no models - they are fetched on first use (#226);
+# `bundle_models` bakes them in. Installers go to Zenodo (#229)
+# and stay available as workflow artifacts, since they exceed the 2 GiB
+# release-asset limit; the GitHub release carries the sha256 checksums
+# and the CycloneDX SBOM (#213) for verification. Flatpak (needs Flathub
+# manifest refresh) and macOS DMG are follow-ups.
 
 on:
   push:
@@ -25,6 +26,7 @@ on:
 
 permissions:
   contents: write  # required for `gh release create`
+  actions: read    # SignPath reads the job and downloads the artifact via the API
 
 env:
   # Pinned like every other input to the build: a new release of the generator
@@ -41,6 +43,8 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       suffix: ${{ steps.version.outputs.suffix }}
+      # Consumed by the signing step in the publish job.
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     # Build ~13 min, plus ~13 min to push the 2.9 GB installer to Zenodo -
     # too close to the previous 30 min limit to absorb network variance.
     timeout-minutes: 60
@@ -155,6 +159,11 @@ jobs:
         # makeappx.exe expects the root of the package tree to contain
         # AppxManifest.xml + all referenced files.
         shell: bash
+        env:
+          # The subject of the signing certificate, which the Publisher has to
+          # match exactly (#211). Read from a variable rather than the shell
+          # substitution below so a name containing quotes cannot break it.
+          PUBLISHER: ${{ vars.SIGNPATH_PUBLISHER }}
         run: |
           version="${{ steps.version.outputs.version }}"
           staging="msix-staging"
@@ -167,7 +176,10 @@ jobs:
           # normalize semver-like strings (e.g. "1.5.0" -> "1.5.0.0",
           # "0.0.0-test" -> "0.0.0.0" for makeappx acceptance).
           normalized="$(echo "$version" | sed 's/-.*//' | awk -F. '{ while (NF<3) { $(NF+1)=0 }; printf "%d.%d.%d", $1, $2, $3 }')"
-          sed "s|{{VERSION}}|$normalized|g" packaging/msix/AppxManifest.xml.template > "$staging/AppxManifest.xml"
+          # Builds that skip signing (forks, no SignPath setup) get a placeholder.
+          publisher="${PUBLISHER:-CN=aTrain unsigned build}"
+          sed -e "s|{{VERSION}}|$normalized|g" -e "s|{{PUBLISHER}}|$publisher|g" \
+            packaging/msix/AppxManifest.xml.template > "$staging/AppxManifest.xml"
           echo "Manifest:"
           cat "$staging/AppxManifest.xml"
 
@@ -200,6 +212,7 @@ jobs:
       - name: Upload MSIX artifact
         # Always uploaded as workflow artifact - the only GitHub channel
         # the installers fit in (releases cap assets at 2 GiB).
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: aTrain-msix-${{ steps.version.outputs.version }}${{ steps.version.outputs.suffix }}
@@ -221,6 +234,11 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      # Here rather than on the step: the `secrets` context is not available in
+      # a step-level `if`, the `env` one is.
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      SIGNPATH_ORG_ID: ${{ secrets.SIGNPATH_ORG_ID }}
 
     steps:
       - name: Checkout
@@ -243,6 +261,30 @@ jobs:
             "https://github.com/$GITHUB_REPOSITORY/archive/refs/tags/v$version.tar.gz"
           ls -la
 
+      - name: Sign the MSIX with SignPath
+        # Authenticode via SignPath (#211). Runs before the checksums and
+        # uploads because signing rewrites the file. The action fetches the
+        # artifact by id and extracts the signed archive over `artifacts/`,
+        # replacing the unsigned MSIX downloaded above. Skipped unless all
+        # five SignPath values are set, so forks and runs without the SignPath
+        # setup still build, just unsigned.
+        if: >-
+          env.SIGNPATH_API_TOKEN != '' && env.SIGNPATH_ORG_ID != '' &&
+          vars.SIGNPATH_PROJECT_SLUG != '' && vars.SIGNPATH_POLICY_SLUG != '' &&
+          vars.SIGNPATH_PUBLISHER != ''
+        uses: SignPath/github-action-submit-signing-request@v2.3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+          # Variables, not secrets: they are identifiers, and switching from the
+          # test certificate to the production one is then a settings change
+          # rather than a code change.
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.build-windows-msix.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: artifacts
+
       - name: Generate sha256 checksums
         # Recomputed over the downloaded files rather than reused from the
         # build job, so the checksums also cover the artifact round-trip. One
@@ -260,8 +302,7 @@ jobs:
         # installers exceed GitHub's 2 GiB per-asset limit, so consumers fetch
         # them from Zenodo (#229) or the workflow artifact and verify them
         # against the sha256 published here. The SBOMs (#213) sit next to them,
-        # small enough to read without downloading a 2.9 GB installer first;
-        # signing material (#211) attaches to the same anchor later.
+        # small enough to read without downloading a 2.9 GB installer first.
         # Two flows are supported:
         # - release created via the GitHub UI (creates the tag on publish,
         #   which triggers this run): upload to the existing release.
