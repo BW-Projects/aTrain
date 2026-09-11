@@ -11,6 +11,8 @@ project overview, badges, and benchmarks, see the [main README](../README.md).
   Flathub) and installing from source with pip.
 - [Linux installation](installation-linux.md) — manual command-line setup on
   Ubuntu / Debian.
+- [Windows deployment](deployment-windows.md) — MSIX rollout on managed
+  machines, for IT departments.
 
 ## Usage
 
