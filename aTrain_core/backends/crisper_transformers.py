@@ -73,9 +73,14 @@ def transcribe(settings: Settings, model_path: Path, audio) -> dict:
     if settings.language == "auto-detect":
         raise ValueError("CrisperWhisper requires a language; select one instead of auto-detect.")
     if settings.initial_prompt:
-        write_logfile("CrisperWhisper does not support initial prompts; ignoring the setting.", settings.file_id)
+        write_logfile(
+            "CrisperWhisper does not support initial prompts; ignoring the setting.",
+            settings.file_id,
+        )
     if settings.temperature is not None:
-        write_logfile("CrisperWhisper does not support temperature; ignoring the setting.", settings.file_id)
+        write_logfile(
+            "CrisperWhisper does not support temperature; ignoring the setting.", settings.file_id
+        )
 
     # Import lazily so the normal faster-whisper path neither initializes nor
     # requires the Transformers backend at module import time.

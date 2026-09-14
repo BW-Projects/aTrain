@@ -42,4 +42,3 @@ def words_to_segments(words: Iterable[object]) -> list[dict]:
             }
         )
     return segments
-

@@ -209,8 +209,8 @@
         }
     },
     "crisperwhisper-v2-large": {
-        "repo_id": "nyralabs/CrisperWhisper2.0_large",
-        "revision": "f4334f6e8193f2691212d49b20fa12d370e13896",
+        "repo_id": "aTrain-core/CrisperWhisper2_large",
+        "revision": "20638bbea0625a8b0883c445a25dbe21f94c62aa",
         "license": "LicenseRef-Nyra-NonCommercial-Research",
         "backend": "crisper-transformers",
         "type": "regular",
@@ -226,7 +226,7 @@
             "ru",
             "sv"
         ],
-        "repo_size": 3092523592,
+        "repo_size": 3086843114,
         "repo_size_human": "3.09 GB",
         "files": {
             ".gitattributes": "sha256:11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
