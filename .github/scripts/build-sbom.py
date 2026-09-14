@@ -110,12 +110,14 @@ def model_components(models: dict, bundled: set[str]) -> list[dict]:
         namespace, _, repo = model["repo_id"].partition("/")
         revision = model["revision"]
         license_name = model["license"]
-        license_entry = {
-            "expression": license_name if license_name.startswith("LicenseRef-") else None,
-            "id": license_name if not license_name.startswith("LicenseRef-") else None,
-            "acknowledgement": "declared",
-        }
-        license_entry = {key: value for key, value in license_entry.items() if value is not None}
+        if license_name.startswith("LicenseRef-"):
+            license_entry = {
+                "expression": license_name,
+                "acknowledgement": "declared",
+            }
+            licenses = [license_entry]
+        else:
+            licenses = [{"license": {"id": license_name, "acknowledgement": "declared"}}]
         components.append(
             {
                 "type": "machine-learning-model",
@@ -128,9 +130,9 @@ def model_components(models: dict, bundled: set[str]) -> list[dict]:
                 "description": f"aTrain model '{name}' ({model['repo_size_human']})",
                 # `declared`: this is what the model card of the repository we
                 # pin states, not the result of an audit of the weights. Custom
-                # LicenseRef values use `expression`; SPDX `id` only accepts
-                # identifiers from the SPDX catalogue.
-                "licenses": [{"license": license_entry}],
+                # LicenseRef values use a top-level SPDX `expression`; SPDX
+                # `id` only accepts identifiers from the SPDX catalogue.
+                "licenses": licenses,
                 "externalReferences": [
                     {"type": "distribution", "url": f"https://huggingface.co/{model['repo_id']}"}
                 ],

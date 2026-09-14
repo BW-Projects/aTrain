@@ -209,10 +209,8 @@ def test_custom_model_licence_uses_an_expression(models):
 
     assert custom["licenses"] == [
         {
-            "license": {
-                "expression": "LicenseRef-Nyra-NonCommercial-Research",
-                "acknowledgement": "declared",
-            }
+            "expression": "LicenseRef-Nyra-NonCommercial-Research",
+            "acknowledgement": "declared",
         }
     ]
 
