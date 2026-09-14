@@ -109,6 +109,13 @@ def model_components(models: dict, bundled: set[str]) -> list[dict]:
     for name, model in sorted(models.items()):
         namespace, _, repo = model["repo_id"].partition("/")
         revision = model["revision"]
+        license_name = model["license"]
+        license_entry = {
+            "expression": license_name if license_name.startswith("LicenseRef-") else None,
+            "id": license_name if not license_name.startswith("LicenseRef-") else None,
+            "acknowledgement": "declared",
+        }
+        license_entry = {key: value for key, value in license_entry.items() if value is not None}
         components.append(
             {
                 "type": "machine-learning-model",
@@ -120,9 +127,10 @@ def model_components(models: dict, bundled: set[str]) -> list[dict]:
                 "purl": f"pkg:huggingface/{namespace}/{repo}@{revision}",
                 "description": f"aTrain model '{name}' ({model['repo_size_human']})",
                 # `declared`: this is what the model card of the repository we
-                # pin states, not the result of an audit of the weights. An id
-                # the SPDX list does not know fails --validate.
-                "licenses": [{"license": {"id": model["license"], "acknowledgement": "declared"}}],
+                # pin states, not the result of an audit of the weights. Custom
+                # LicenseRef values use `expression`; SPDX `id` only accepts
+                # identifiers from the SPDX catalogue.
+                "licenses": [{"license": license_entry}],
                 "externalReferences": [
                     {"type": "distribution", "url": f"https://huggingface.co/{model['repo_id']}"}
                 ],
