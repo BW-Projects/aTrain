@@ -7,7 +7,6 @@ from importlib.resources import files
 
 import yaml
 from aTrain_core.globals import METADATA_FILENAME, TRANSCRIPT_DIR
-from nicegui import ui
 from showinfm import show_in_file_manager
 
 
@@ -83,6 +82,8 @@ def open_file_directory(file_id) -> None:
 
 def download_file_directory(file_id) -> None:
     """A function that zips a past transcription and lets the client download it."""
+    from nicegui import ui
+
     file_id = "" if file_id == "all" else file_id
     directory = os.path.join(TRANSCRIPT_DIR, file_id)
     if os.path.exists(directory):
