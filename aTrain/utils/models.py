@@ -62,9 +62,13 @@ def read_model_metadata() -> list:
     for model in all_models:
         model_info = {
             "model": model,
+            "display_name": model_metadata[model].get("display_name", model),
+            "group": model_metadata[model].get("group", "All others"),
             "size": model_metadata[model]["repo_size_human"],
             "downloaded": model in downloaded_models,
         }
+        if info := model_metadata[model].get("info"):
+            model_info["info"] = info
         all_models_metadata.append(model_info)
 
     all_models_metadata = sorted(all_models_metadata, key=lambda x: x["downloaded"], reverse=True)
