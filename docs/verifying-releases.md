@@ -32,6 +32,9 @@ Windows:
 (Get-FileHash .\aTrain-<version>.msix -Algorithm SHA256).Hash
 ```
 
+PowerShell prints the hash in upper case, `checksums.txt` uses lower case;
+compare case-insensitively.
+
 Linux/macOS:
 
 ```bash
