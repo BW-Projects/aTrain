@@ -25,7 +25,7 @@ dependencies = [
   "pyannote.audio==4.0.4",
   "numpy==2.2.2",
   "werkzeug==3.1.8",
-  "huggingface-hub==0.30.2",
+  "huggingface-hub==1.31.0",
   "torch==2.9.1+cu128; sys_platform == 'win32'",
   "torch==2.9.1; sys_platform != 'win32'",
   # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
