@@ -13,13 +13,15 @@ Every release is a git tag `v<version>` and a GitHub release built from it by
 
 | File | Where | Notes |
 |------|-------|-------|
-| `aTrain-<version>.msix` | [Zenodo](https://doi.org/10.5281/zenodo.22018704) | Windows installer, Authenticode-signed. Too large for GitHub release assets. |
+| `aTrain-<version>.msix` | [Zenodo](https://doi.org/10.5281/zenodo.22018704) | Windows installer, Authenticode-signed. |
 | `checksums.txt` | GitHub release and Zenodo | SHA-256 of every file below, computed after signing. Both copies are identical. |
 | `aTrain-<version>-windows.cdx.json` | GitHub release | CycloneDX SBOM of the Windows build. |
 | `aTrain-<version>-source.tar.gz` | GitHub (tag archive) | Source at the tag; its hash is in `checksums.txt`. |
 
-The workflow run itself is linked from the release page. Its artifacts are
-the unsigned build; the signed installer only exists on Zenodo.
+The run that built a release is listed under
+[Actions > Release](https://github.com/aTrainTranscription/aTrain/actions/workflows/release.yml)
+with the tag in the branch column. Its artifacts are the unsigned build; the
+signed installer only exists on Zenodo.
 
 ## 1. Compare the checksum
 
@@ -50,12 +52,6 @@ Get-AuthenticodeSignature .\aTrain-<version>.msix | Format-List Status, SignerCe
 [Code signing policy](code-signing-policy.md): issued to SignPath Foundation,
 applied through SignPath.io. The policy page also lists who may approve a
 signing request.
-
-Prereleases (`-rcN` tags) built before the Foundation certificate was issued
-carry SignPath's test certificate instead
-(`CN=Test certificate for 'aTrain [OSS]'`). Windows trusts it only after it is
-imported into `LocalMachine\TrustedPeople`; do not use such a build outside
-of testing.
 
 ## 3. Verify the source
 
