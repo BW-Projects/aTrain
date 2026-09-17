@@ -72,6 +72,42 @@ async def test_download_button_invokes_download_model(mocked_models, user: User)
     assert download_calls == ["tiny"]
 
 
+@pytest.fixture
+def crisperwhisper_metadata(monkeypatch):
+    monkeypatch.setattr(
+        models_utils,
+        "read_model_metadata",
+        lambda: [{"model": "crisperwhisper-v2-large", "size": "3.09 GB", "downloaded": False}],
+    )
+
+
+async def test_crisperwhisper_download_requires_license_acceptance(
+    mocked_models, crisperwhisper_metadata, user: User
+):
+    download_calls, _ = mocked_models
+    await user.open("/models")
+    await user.should_see("Model Manager", retries=100)
+    user.find(kind=ui.button, content="Download").click()
+    await user.should_see("CrisperWhisper license confirmation")
+    assert download_calls == []
+
+    user.find(kind=ui.button, content="Accept").click()
+    assert download_calls == ["crisperwhisper-v2-large"]
+
+
+async def test_crisperwhisper_license_cancel_does_not_start_download(
+    mocked_models, crisperwhisper_metadata, user: User
+):
+    download_calls, _ = mocked_models
+    await user.open("/models")
+    await user.should_see("Model Manager", retries=100)
+    user.find(kind=ui.button, content="Download").click()
+    await user.should_see("CrisperWhisper license confirmation")
+
+    user.find(kind=ui.button, content="Cancel").click()
+    assert download_calls == []
+
+
 async def test_delete_button_invokes_remove_model(mocked_models, user: User):
     _, remove_calls = mocked_models
     await user.open("/models")

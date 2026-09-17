@@ -1,3 +1,4 @@
+from aTrain.components.dialogs.license import dialog_crisperwhisper_license
 from aTrain.layouts.base import base_layout
 from aTrain.utils.models import download_model, read_model_metadata, remove_model
 from aTrain_core.globals import is_packaged_model
@@ -43,4 +44,11 @@ def page():
                             else:
                                 btn_download = ui.button("Download", color="dark")
                                 btn_download.props("no-caps size=0.7rem unelevated")
-                                btn_download.on_click(lambda m=model: download_model(m["model"]))
+                                if model["model"] == "crisperwhisper-v2-large":
+                                    btn_download.on_click(
+                                        lambda m=model: dialog_crisperwhisper_license(
+                                            lambda: download_model(m["model"])
+                                        )
+                                    )
+                                else:
+                                    btn_download.on_click(lambda m=model: download_model(m["model"]))
