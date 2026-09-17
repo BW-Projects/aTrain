@@ -25,7 +25,3 @@ data/
 .env.*.local
 .vscode
 .nicegui/
-
-# Local Codex instructions and state
-AGENTS.md
-.codex/
