@@ -51,4 +51,6 @@ def page():
                                         )
                                     )
                                 else:
-                                    btn_download.on_click(lambda m=model: download_model(m["model"]))
+                                    btn_download.on_click(
+                                        lambda m=model: download_model(m["model"])
+                                    )

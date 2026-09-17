@@ -2,7 +2,6 @@ from collections.abc import Callable
 
 from nicegui import ui
 
-
 CRISPERWHISPER_LICENSE = (
     "https://huggingface.co/aTrain-core/CrisperWhisper2_large/blob/"
     "20638bbea0625a8b0883c445a25dbe21f94c62aa/LICENSE.md"
