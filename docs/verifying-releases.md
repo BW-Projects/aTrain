@@ -18,10 +18,9 @@ Every release is a git tag `v<version>` and a GitHub release built from it by
 | `aTrain-<version>-windows.cdx.json` | GitHub release | CycloneDX SBOM of the Windows build. |
 | `aTrain-<version>-source.tar.gz` | GitHub (tag archive) | Source at the tag; its hash is in `checksums.txt`. |
 
-The run that built a release is listed under
-[Actions > Release](https://github.com/aTrainTranscription/aTrain/actions/workflows/release.yml)
-with the tag in the branch column. Its artifacts are the unsigned build; the
-signed installer only exists on Zenodo.
+Do not take the installer from the workflow run under Actions: that artifact
+is the build before signing, and its hash is not the one in `checksums.txt`.
+The signed installer only exists on Zenodo.
 
 ## 1. Compare the checksum
 
