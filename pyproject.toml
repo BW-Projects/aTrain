@@ -21,11 +21,17 @@ requires-python = ">=3.11"
 dependencies = [
   # Engine (formerly aTrain_core's own dependencies; consolidated post-monorepo merge)
   "faster-whisper==1.2.1",
+  # CrisperWhisper v2 uses this Transformers-only path. Do not add its
+  # CTranslate2 extra (a incompatible fork of Ctranslate2 used by faster-whisper):
+  "crisperwhisper[transformers]==2.0.2",
+  "transformers==4.57.3",
   "pandas==2.3.3",
   "pyannote.audio==4.0.4",
   "numpy==2.2.2",
   "werkzeug==3.1.8",
-  "huggingface-hub==0.30.2",
+  # transformers 4.57 requires >=0.34; keep this below 1 until all callers
+  # have been evaluated against the Hub 1.x API.
+  "huggingface-hub==0.36.0",
   "torch==2.9.1+cu128; sys_platform == 'win32'",
   "torch==2.9.1; sys_platform != 'win32'",
   # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
