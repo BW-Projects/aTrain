@@ -3,36 +3,30 @@
 For IT departments rolling aTrain out to managed machines. End users looking
 for a normal installation should read [Installation](installation.md) instead.
 
-## Package format
-
-aTrain ships as an **MSIX** package. Two properties matter for deployment:
-
-- **No uninstall entry in the registry.** Detection and verification go
-through the `Get-AppxPackage` and `Get-AppxProvisionedPackage` cmdlets.
-- **Installation is always tied to a user account.** Machine-wide, the package
-is *provisioned*; each user receives it at their next sign-in, not
-immediately.
-
 ## Requirements
 
-- Windows 10 build 1809 or later, or Windows 11, 64-bit.
+- Windows 10 or Windows 11 (64-bit).
 - **Sideloading must not be blocked by policy.** In our tests this was the only
 setting that actually prevented installation:
 `Computer Configuration > Administrative Templates > Windows Components > App Package Deployment > Allow all trusted apps to install`.
-  - Not configured or enabled both work
-  - disabled blocks the install with *"a Windows developer license or a sideload-enabled system is required"*.
+  - When sideloading is disabled, the install blocks with *"a Windows developer license or a sideload-enabled system is required"*.
   - Sideloading has been the default since Windows 10 version 2004, so a block is a deliberate policy.
 - Administrator rights, or execution as `SYSTEM`, for machine-wide
 provisioning.
+- Outbound access to `huggingface.co` for the first model download, unless a
+build with bundled models is used. Machines without internet access need the
+bundled build.
+- Write access to `%USERPROFILE%\Documents\aTrain\` or to the path set via the
+`ATRAIN_USER_DIR` environment variable. With folder redirection the models
+land on the network share; plan for several GB per user.
 
-Transcription models are downloaded from `huggingface.co` on first use unless
-they are bundled into the package. On machines without internet access, use a
-build with bundled models.
+aTrain ships as an **MSIX** package, which affects how it is managed:
 
-User data and models live under
-`%USERPROFILE%\Documents\aTrain\`; the location can be redirected with the
-`ATRAIN_USER_DIR` environment variable. Note that folder redirection puts them
-on a network share.
+- **There is no uninstall entry in the registry.** Detection and verification
+must use the `Get-AppxPackage` and `Get-AppxProvisionedPackage` cmdlets.
+- **Installation is always tied to a user account.** Machine-wide, the package
+is *provisioned*; each user receives it at their next sign-in, not
+immediately. Plan rollouts accordingly.
 
 ## Obtaining the package
 
