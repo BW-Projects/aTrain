@@ -37,7 +37,7 @@ Get-FileHash .\aTrain-<version>.msix -Algorithm SHA256
 Get-AuthenticodeSignature .\aTrain-<version>.msix | Format-List Status, SignerCertificate
 ```
 
-The expected hash is listed in `checksums.txt` on the GitHub release; the copy in the Zenodo record is identical.
+The expected hash is listed in `checksums.txt` on the GitHub release; the copy in the Zenodo record is identical. [Verifying a release](verifying-releases.md) covers the signature and the SBOM in more detail.
 
 ## Installing
 
