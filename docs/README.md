@@ -13,6 +13,8 @@ project overview, badges, and benchmarks, see the [main README](../README.md).
   Ubuntu / Debian.
 - [Windows deployment](deployment-windows.md) — MSIX rollout on managed
   machines, for IT departments.
+- [Uninstalling aTrain](uninstall.md) — removing the app and its data for
+  MSIX, Flatpak, pip and service installations.
 
 ## Usage
 
