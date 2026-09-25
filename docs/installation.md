@@ -70,6 +70,36 @@ Start aTrain:
 aTrain start
 ```
 
+### Uninstalling a pip installation
+
+| Location                                                                 | Contents                                       | Removed by uninstall | Personal data |
+| ------------------------------------------------------------------------ | ---------------------------------------------- | -------------------- | ------------- |
+| the virtual environment you created (`venv`, `atrain_venv`, ...)         | aTrain and its dependencies, several GB        | when you delete it   | no            |
+| `~/Documents/aTrain/models/`                                             | downloaded models, several GB                  | no                   | no            |
+| `~/Documents/aTrain/transcriptions/`                                     | one folder per transcription: text, `metadata.txt`, `log.txt` | no    | **yes**       |
+| `~/Documents/aTrain/settings/`                                           | the options last used in the app               | no                   | no            |
+| `~/.cache/matplotlib/` and `~/.config/matplotlib/` (Linux), `~/.matplotlib/` (macOS), `%LOCALAPPDATA%\matplotlib\` (Windows) | font cache of a library aTrain loads; harmless | no | no |
+| pip's download cache (`pip cache dir`)                                   | downloaded wheels, including torch             | no                   | no            |
+| the system temp directory                                                | one folder per start in native mode; the OS cleans it | no             | no            |
+
+`~/Documents/aTrain` moves to the path in `ATRAIN_USER_DIR` when that is set.
+
+**Remove the application:** deactivate the environment and delete its folder.
+That removes aTrain and everything installed with it. `pip uninstall aTrain`
+only makes sense in an environment shared with other software. System packages
+installed for the manual Linux setup (ffmpeg, build tools) are shared with
+other software; leave them.
+
+**Remove the user data.** This deletes all transcripts:
+
+```bash
+rm -rf ~/Documents/aTrain        # macOS, Linux
+```
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\Documents\aTrain"
+```
+
 ## Command-line / headless usage
 
 For headless transcription pipelines, aTrain also exposes a CLI (`aTrain_core

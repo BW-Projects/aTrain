@@ -5,8 +5,11 @@ the application never deletes transcripts: they live outside the application
 and stay there until you remove them. The last section lists where the
 personal data is.
 
-Pick the section for the way aTrain was installed. Each starts with the normal
-user path and continues with the commands for administrators.
+This page covers the two official channels, the MSIX package on Windows and
+the Flatpak on Linux. Each section starts with the normal user path and
+continues with the commands for administrators. For a pip installation see
+[Installation](installation.md#uninstalling-a-pip-installation), for the
+experimental Linux service see [Run aTrain as Linux Service](linux/service.md#uninstalling).
 
 ## Windows (MSIX, Store or downloaded package)
 
@@ -112,69 +115,15 @@ Leave out `--delete-data` to keep models and settings for a later reinstall.
 rm -rf ~/Documents/aTrain
 ```
 
-## Installed with pip (Windows, macOS, Linux)
-
-| Location                                                                 | Contents                                       | Removed by uninstall | Personal data |
-| ------------------------------------------------------------------------ | ---------------------------------------------- | -------------------- | ------------- |
-| the virtual environment you created (`venv`, `atrain_venv`, ...)         | aTrain and its dependencies, several GB        | when you delete it   | no            |
-| `~/Documents/aTrain/models/`                                             | downloaded models, several GB                  | no                   | no            |
-| `~/Documents/aTrain/transcriptions/`                                     | one folder per transcription: text, `metadata.txt`, `log.txt` | no    | **yes**       |
-| `~/Documents/aTrain/settings/`                                           | the options last used in the app               | no                   | no            |
-| `~/.cache/matplotlib/` and `~/.config/matplotlib/` (Linux), `~/.matplotlib/` (macOS), `%LOCALAPPDATA%\matplotlib\` (Windows) | font cache of a library aTrain loads; harmless | no | no |
-| pip's download cache (`pip cache dir`)                                   | downloaded wheels, including torch             | no                   | no            |
-| the system temp directory                                                | one folder per start in native mode; the OS cleans it | no             | no            |
-
-`~/Documents/aTrain` moves to the path in `ATRAIN_USER_DIR` when that is set.
-
-**Remove the application:** deactivate the environment and delete its folder.
-That removes aTrain and everything installed with it. `pip uninstall aTrain`
-only makes sense in an environment shared with other software. System packages
-installed for the manual Linux setup (ffmpeg, build tools) are shared with
-other software; leave them.
-
-**Remove the user data.** This deletes all transcripts:
-
-```bash
-rm -rf ~/Documents/aTrain        # macOS, Linux
-```
-
-```powershell
-Remove-Item -Recurse -Force "$env:USERPROFILE\Documents\aTrain"
-```
-
-## Linux service (systemd)
-
-For installations that follow [Run aTrain as Linux Service](linux/service.md).
-The service runs as root, and all users of the web interface share one data
-folder.
-
-| Location                              | Contents                                                     | Personal data      |
-| ------------------------------------- | ------------------------------------------------------------ | ------------------ |
-| `/etc/systemd/system/aTrain.service`  | unit file; may hold a Hugging Face token in clear text       | the token          |
-| `/opt/aTrain/`                        | checkout and virtual environment                             | no                 |
-| `/srv/aTrain/`                        | models, settings and the transcriptions of every user        | **yes**            |
-| systemd journal (`journalctl -u aTrain.service`) | service output, can include names of processed files | file names   |
-| `/root/.cache/`                       | uv and library caches; harmless                              | no                 |
-
-```bash
-sudo systemctl disable --now aTrain.service
-sudo rm /etc/systemd/system/aTrain.service
-sudo systemctl daemon-reload
-sudo rm -rf /opt/aTrain          # the application
-sudo rm -rf /srv/aTrain          # models, settings and ALL transcripts
-```
-
-Revoke the Hugging Face token on huggingface.co if it was created for this
-machine. The journal follows the system's log retention settings; nothing in
-it is needed after the service is gone.
-
 ## What the data contains
 
 - **Transcriptions** are personal data: the text of the recording, speaker
   labels, `metadata.txt` with the original file name and the options used, and
   `log.txt`. The recordings themselves are not stored; aTrain reads them from
   where you selected them. Delete the `transcriptions` folder when a machine is
-  decommissioned or a user leaves.
+  decommissioned or a user leaves. From inside the app, the **Delete All**
+  button in the Archive tab does the same for the current profile; models and
+  settings stay.
 - **Models** are large but contain no personal data. They can also be removed
   one by one on the Models page of the app.
 - **Settings** hold the options last used in the app.
@@ -189,10 +138,7 @@ above. A later installation finds the folder again.
 
 After a complete removal:
 
-- [ ] No package is registered (`Get-AppxPackage -AllUsers`, `flatpak list`, the
-  virtual environment folder, `systemctl status aTrain.service`).
+- [ ] No package is registered (`Get-AppxPackage -AllUsers`, `flatpak list`).
 - [ ] No provisioning entry on Windows (`Get-AppxProvisionedPackage -Online`).
 - [ ] No Start menu or application menu entry.
 - [ ] No `Documents\aTrain` (or the `ATRAIN_USER_DIR` path) in any profile.
-- [ ] For the service: no unit file, `/opt/aTrain` and `/srv/aTrain` gone, the
-  token revoked.
