@@ -76,28 +76,3 @@ sudo journalctl -e -u aTrain.service
 ```
 
 You can put this behind a reverse proxy, but prefix-path is currently not supported.
-
-## Uninstalling
-
-The service runs as root, and all users of the web interface share one data
-folder.
-
-| Location                              | Contents                                                     | Personal data      |
-| ------------------------------------- | ------------------------------------------------------------ | ------------------ |
-| `/etc/systemd/system/aTrain.service`  | unit file; may hold a Hugging Face token in clear text       | the token          |
-| `/opt/aTrain/`                        | checkout and virtual environment                             | no                 |
-| `/srv/aTrain/`                        | models, settings and the transcriptions of every user        | **yes**            |
-| systemd journal (`journalctl -u aTrain.service`) | service output, can include names of processed files | file names   |
-| `/root/.cache/`                       | uv and library caches; harmless                              | no                 |
-
-```bash
-sudo systemctl disable --now aTrain.service
-sudo rm /etc/systemd/system/aTrain.service
-sudo systemctl daemon-reload
-sudo rm -rf /opt/aTrain          # the application
-sudo rm -rf /srv/aTrain          # models, settings and ALL transcripts
-```
-
-Revoke the Hugging Face token on huggingface.co if it was created for this
-machine. The journal follows the system's log retention settings; nothing in
-it is needed after the service is gone.

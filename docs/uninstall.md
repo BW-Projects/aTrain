@@ -7,9 +7,7 @@ personal data is.
 
 This page covers the two official channels, the MSIX package on Windows and
 the Flatpak on Linux. Each section starts with the normal user path and
-continues with the commands for administrators. For a pip installation see
-[Installation](installation.md#uninstalling-a-pip-installation), for the
-experimental Linux service see [Run aTrain as Linux Service](linux/service.md#uninstalling).
+continues with the commands for administrators.
 
 ## Windows (MSIX, Store or downloaded package)
 
