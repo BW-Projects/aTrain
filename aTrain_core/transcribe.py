@@ -90,7 +90,11 @@ def transcribe(settings: Settings):
     if transcript:
         from aTrain_core.backends.crisper_transformers import group_word_segments
 
-        transcript = {"segments": group_word_segments(transcript["segments"])}
+        transcript = {
+            "segments": group_word_segments(
+                transcript["segments"], join_raw=backend != "crisper-transformers"
+            )
+        }
     create_output_files(transcript, settings.speaker_detection, settings.file_id)
     write_logfile("No speaker detection. Created output files", settings.file_id)
     add_processing_time_to_metadata(settings.file_id)

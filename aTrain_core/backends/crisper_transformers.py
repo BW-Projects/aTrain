@@ -49,8 +49,12 @@ def _append_word_text(text: str, word: str) -> str:
 SENTENCE_END = (".", "?", "!", "…")
 
 
-def group_word_segments(segments: list[dict]) -> list[dict]:
-    """Merge word segments into sentence-aware output cues."""
+def group_word_segments(segments: list[dict], join_raw: bool = False) -> list[dict]:
+    """Merge word segments into sentence-aware output cues.
+
+    With join_raw, words are concatenated as emitted (faster-whisper words carry their own
+    leading space, and none for languages written without spaces).
+    """
     grouped: list[dict] = []
     for segment in segments:
         if not grouped:
@@ -68,7 +72,10 @@ def group_word_segments(segments: list[dict]) -> list[dict]:
             continue
 
         current["end"] = segment["end"]
-        current["text"] = _append_word_text(current["text"], segment["text"])
+        if join_raw:
+            current["text"] += "".join(w["word"] for w in segment.get("words", []))
+        else:
+            current["text"] = _append_word_text(current["text"], segment["text"])
         current["words"].extend(segment.get("words", []))
     return grouped
 
