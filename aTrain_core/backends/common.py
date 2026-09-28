@@ -37,7 +37,7 @@ def words_to_segments(words: Iterable[object]) -> list[dict]:
             {
                 "start": word_dict["start"],
                 "end": word_dict["end"],
-                "text": word_dict["word"],
+                "text": word_dict["word"].strip(),
                 "words": [word_dict],
             }
         )

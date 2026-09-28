@@ -230,7 +230,7 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
             speaker = (
                 dia_tmp.groupby("speaker")["intersection"]
                 .sum()
-                .sort_values(ascending=False)
+                .sort_values(ascending=False, kind="stable")
                 .index[0]
             )
             seg["speaker"] = speaker
@@ -248,12 +248,24 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
                         if not fill_nearest
                         else diarize_df
                     )
+                    at_onset = dia_tmp[
+                        (dia_tmp["start"] <= word["start"]) & (dia_tmp["end"] > word["start"])
+                    ]
+                    if len(at_onset) > 0:
+                        dia_tmp = at_onset
                     if len(dia_tmp) > 0:
                         speaker = (
                             dia_tmp.groupby("speaker")["intersection"]
                             .sum()
-                            .sort_values(ascending=False)
+                            .sort_values(ascending=False, kind="stable")
                             .index[0]
                         )
                         word["speaker"] = speaker
+            durations = {}
+            for word in seg["words"]:
+                if "speaker" in word:
+                    duration = word["end"] - word["start"]
+                    durations[word["speaker"]] = durations.get(word["speaker"], 0) + duration
+            if durations:
+                seg["speaker"] = max(durations, key=durations.get)
     return transcript_result
