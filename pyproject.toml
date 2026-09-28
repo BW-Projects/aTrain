@@ -25,7 +25,7 @@ dependencies = [
   # CTranslate2 extra (a incompatible fork of Ctranslate2 used by faster-whisper):
   "crisperwhisper[transformers]==2.0.3",
   "transformers==4.57.3",
-  "pandas==2.3.3",
+  "pandas==3.0.6",
   "pyannote.audio==4.0.7",
   "numpy==2.4.6",
   "werkzeug==3.1.8",
