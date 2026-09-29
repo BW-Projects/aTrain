@@ -25,7 +25,11 @@ from pyannote.audio.pipelines.utils.hook import ProgressHook
 from tqdm import tqdm
 from werkzeug.utils import secure_filename
 
-from aTrain_core.backends.common import group_word_segments, words_to_segments
+from aTrain_core.backends.common import (
+    SRT_MAX_DURATION,
+    group_word_segments,
+    words_to_segments,
+)
 from aTrain_core.globals import SAMPLING_RATE, TIMESTAMP_FORMAT
 from aTrain_core.load_resources import get_model, load_model_config_file
 from aTrain_core.outputs import (
@@ -88,13 +92,15 @@ def transcribe(settings: Settings):
         transcript = run_transcription(settings, model_path, audio_array)
     if settings.speaker_detection and transcript:
         transcript = run_speaker_detection(settings, audio_duration, audio_array, transcript)
+    subtitles = transcript
     if transcript:
-        transcript = {
-            "segments": group_word_segments(
-                transcript["segments"], join_raw=backend != "crisper-transformers"
-            )
+        join_raw = backend != "crisper-transformers"
+        segments = transcript["segments"]
+        transcript = {"segments": group_word_segments(segments, join_raw)}
+        subtitles = {
+            "segments": group_word_segments(segments, join_raw, max_duration=SRT_MAX_DURATION)
         }
-    create_output_files(transcript, settings.speaker_detection, settings.file_id)
+    create_output_files(transcript, settings.speaker_detection, settings.file_id, subtitles)
     write_logfile("Created output files", settings.file_id)
     add_processing_time_to_metadata(settings.file_id)
     write_logfile("Processing time added to metadata", settings.file_id)

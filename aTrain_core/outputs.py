@@ -40,7 +40,7 @@ def create_file_id(file_path, timestamp):
     return file_id
 
 
-def create_output_files(result, speaker_detection, file_id):
+def create_output_files(result, speaker_detection, file_id, subtitles=None):
     """Creates output files based on the transcription result."""
     create_json_file(result, file_id)
     create_txt_file(
@@ -53,7 +53,7 @@ def create_output_files(result, speaker_detection, file_id):
         result, file_id, speaker_detection, maxqda=False, timestamps=True, brackets=False
     )  # NEW: NVivo output format
     create_txt_file(result, file_id, speaker_detection, maxqda=True, timestamps=True, brackets=True)
-    create_srt_file(result, file_id)
+    create_srt_file(subtitles or result, file_id)
 
 
 def create_json_file(result, file_id):

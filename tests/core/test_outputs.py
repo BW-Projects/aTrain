@@ -1,5 +1,9 @@
 import pandas as pd
-from aTrain_core.backends.common import group_word_segments, words_to_segments
+from aTrain_core.backends.common import (
+    SRT_MAX_DURATION,
+    group_word_segments,
+    words_to_segments,
+)
 from aTrain_core.outputs import assign_word_speakers, smooth_speaker_flips
 
 
@@ -117,13 +121,16 @@ def test_gap_fill_labels_words():
     assert result["segments"][0]["words"][0]["speaker"] == "B"
 
 
-def cues(*words, join_raw=False):
+def cues(*words, join_raw=False, max_duration=20.0):
     """Group (text, start, end[, speaker]) tuples like the transcription pipeline."""
     segments = words_to_segments({"word": w[0], "start": w[1], "end": w[2]} for w in words)
     for segment, w in zip(segments, words, strict=True):
         if len(w) == 4:
             segment["speaker"] = w[3]
-    return [(c["text"], c["start"], c["end"]) for c in group_word_segments(segments, join_raw)]
+    return [
+        (c["text"], c["start"], c["end"])
+        for c in group_word_segments(segments, join_raw, max_duration)
+    ]
 
 
 def test_cue_ends_at_sentence_boundary():
@@ -246,3 +253,24 @@ def test_flip_at_start_or_end_is_kept():
         "A",
         "B",
     ]
+
+
+def test_subtitle_cap():
+    words = [(" w", float(i), float(i) + 0.9) for i in range(25)]
+
+    result = cues(*words, max_duration=SRT_MAX_DURATION)
+
+    assert [c[1] for c in result] == [0.0, 7.0, 14.0, 21.0]
+    assert all(end - start <= SRT_MAX_DURATION for _, start, end in result)
+
+
+def test_subtitle_cap_keeps_sentence_split():
+    result = cues(
+        (" This", 0.0, 1.0),
+        (" is", 1.0, 2.0),
+        (" long.", 2.0, 4.0),
+        (" Next", 4.1, 5.0),
+        max_duration=SRT_MAX_DURATION,
+    )
+
+    assert result == [("This is long.", 0.0, 4.0), ("Next", 4.1, 5.0)]

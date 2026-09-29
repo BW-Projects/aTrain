@@ -56,6 +56,7 @@ def _append_word_text(text: str, word: str) -> str:
 
 
 SENTENCE_END = (".", "?", "!", "…", "。", "？", "！")  # noqa: RUF001
+SRT_MAX_DURATION = 7.0
 _CLOSERS = "\"'”’»)]」』"  # noqa: RUF001
 
 
@@ -64,7 +65,9 @@ def ends_sentence(text: str) -> bool:
     return text.rstrip(_CLOSERS).endswith(SENTENCE_END)
 
 
-def group_word_segments(segments: list[dict], join_raw: bool = False) -> list[dict]:
+def group_word_segments(
+    segments: list[dict], join_raw: bool = False, max_duration: float = 20.0
+) -> list[dict]:
     """Merge word segments into sentence-aware output cues.
 
     With join_raw, words are concatenated as emitted (faster-whisper words carry their own
@@ -79,7 +82,7 @@ def group_word_segments(segments: list[dict], join_raw: bool = False) -> list[di
         current = grouped[-1]
         gap = segment["start"] - current["end"]
         same_speaker = segment.get("speaker") == current.get("speaker")
-        within_duration = segment["end"] - current["start"] <= 20.0
+        within_duration = segment["end"] - current["start"] <= max_duration
         sentence_done = ends_sentence(current["text"])
         long_enough = current["end"] - current["start"] >= 3.0
         if not same_speaker or gap >= 2.0 or not within_duration or (sentence_done and long_enough):
