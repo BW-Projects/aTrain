@@ -2,7 +2,6 @@ import json
 import os
 import shutil
 import time
-from dataclasses import asdict, is_dataclass
 from datetime import datetime
 
 import numpy as np
@@ -126,35 +125,6 @@ def transform_speakers_results(diarization_segments):
     diarize_df["end"] = diarize_df[0].apply(lambda x: x.end)
     diarize_df.rename(columns={2: "speaker"}, inplace=True)
     return diarize_df
-
-
-def named_tuple_to_dict(obj):
-    """Converts named tuple to dictionary."""
-    if isinstance(obj, dict):
-        return {key: named_tuple_to_dict(value) for key, value in obj.items()}
-    if isinstance(obj, list):
-        return [named_tuple_to_dict(value) for value in obj]
-    if is_dataclass(obj):
-        return {key: named_tuple_to_dict(value) for key, value in asdict(obj).items()}
-    if isnamedtupleinstance(obj) or (hasattr(obj, "_asdict") and callable(obj._asdict)):
-        return {key: named_tuple_to_dict(value) for key, value in obj._asdict().items()}
-    if hasattr(obj, "__dict__"):
-        return {key: named_tuple_to_dict(value) for key, value in vars(obj).items()}
-    if isinstance(obj, tuple):
-        return tuple(named_tuple_to_dict(value) for value in obj)
-    return obj
-
-
-def isnamedtupleinstance(x):
-    """Checks if the object is an instance of namedtuple."""
-    _type = type(x)
-    bases = _type.__bases__
-    if len(bases) != 1 or bases[0] is not tuple:
-        return False
-    fields = getattr(_type, "_fields", None)
-    if not isinstance(fields, tuple):
-        return False
-    return all(type(i) is str for i in fields)
 
 
 def create_metadata(settings: Settings, audio_duration: int):

@@ -1,6 +1,5 @@
 import pandas as pd
-from aTrain_core.backends.common import words_to_segments
-from aTrain_core.backends.crisper_transformers import group_word_segments
+from aTrain_core.backends.common import group_word_segments, words_to_segments
 from aTrain_core.outputs import assign_word_speakers
 
 
