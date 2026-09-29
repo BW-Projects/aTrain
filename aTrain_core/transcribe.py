@@ -167,7 +167,16 @@ def run_transcription(
             else settings.temperature,
         )
         segments = transcription_with_progress_bar(segments, info, settings.progress)
-        words = [word for segment in segments for word in segment.words or []]
+        words = []
+        for segment in segments:
+            if segment.words:
+                words.extend(segment.words)
+            elif segment.text.strip():
+                write_logfile(
+                    f"Segment without word timestamps kept as one word: {segment.start:.1f}s",
+                    settings.file_id,
+                )
+                words.append({"word": segment.text, "start": segment.start, "end": segment.end})
         transcript = {"segments": words_to_segments(words)}
         write_logfile("Transcription successful", settings.file_id)
         if settings.device == Device.CPU:
