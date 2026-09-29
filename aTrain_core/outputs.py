@@ -190,30 +190,12 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
     """
     transcript_segments = transcript_result["segments"]
     for seg in transcript_segments:
-        diarize_df["intersection"] = np.minimum(diarize_df["end"], seg["end"]) - np.maximum(
-            diarize_df["start"], seg["start"]
-        )
-        diarize_df["union"] = np.maximum(diarize_df["end"], seg["end"]) - np.minimum(
-            diarize_df["start"], seg["start"]
-        )
-        dia_tmp = diarize_df[diarize_df["intersection"] > 0] if not fill_nearest else diarize_df
-        if len(dia_tmp) > 0:
-            speaker = (
-                dia_tmp.groupby("speaker")["intersection"]
-                .sum()
-                .sort_values(ascending=False, kind="stable")
-                .index[0]
-            )
-            seg["speaker"] = speaker
         if "words" in seg:
             for word in seg["words"]:
                 if "start" in word:
                     diarize_df["intersection"] = np.minimum(
                         diarize_df["end"], word["end"]
                     ) - np.maximum(diarize_df["start"], word["start"])
-                    diarize_df["union"] = np.maximum(diarize_df["end"], word["end"]) - np.minimum(
-                        diarize_df["start"], word["start"]
-                    )
                     dia_tmp = (
                         diarize_df[diarize_df["intersection"] > 0]
                         if not fill_nearest
@@ -239,6 +221,20 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
                     durations[word["speaker"]] = durations.get(word["speaker"], 0) + duration
             if durations:
                 seg["speaker"] = max(durations, key=durations.get)
+        # Fall back to the segment's own overlap when no word got a speaker.
+        if "speaker" not in seg:
+            diarize_df["intersection"] = np.minimum(diarize_df["end"], seg["end"]) - np.maximum(
+                diarize_df["start"], seg["start"]
+            )
+            dia_tmp = diarize_df[diarize_df["intersection"] > 0] if not fill_nearest else diarize_df
+            if len(dia_tmp) > 0:
+                speaker = (
+                    dia_tmp.groupby("speaker")["intersection"]
+                    .sum()
+                    .sort_values(ascending=False, kind="stable")
+                    .index[0]
+                )
+                seg["speaker"] = speaker
     # Segments overlapping no speaker turn take the speaker of the nearest turn.
     if len(diarize_df) > 0:
         for seg in transcript_segments:
