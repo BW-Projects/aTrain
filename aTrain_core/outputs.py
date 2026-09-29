@@ -238,12 +238,14 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
                     durations[word["speaker"]] = durations.get(word["speaker"], 0) + duration
             if durations:
                 seg["speaker"] = max(durations, key=durations.get)
-    # Words in gaps between speaker turns inherit the previous (or first) assigned speaker.
-    segments = transcript_result["segments"]
-    last_speaker = next((seg["speaker"] for seg in segments if "speaker" in seg), None)
-    for seg in segments:
-        if "speaker" in seg:
-            last_speaker = seg["speaker"]
-        elif last_speaker is not None:
-            seg["speaker"] = last_speaker
+    # Segments overlapping no speaker turn take the speaker of the nearest turn.
+    if len(diarize_df) > 0:
+        for seg in transcript_segments:
+            if "speaker" not in seg:
+                distance = np.maximum(
+                    diarize_df["start"] - seg["end"], seg["start"] - diarize_df["end"]
+                )
+                seg["speaker"] = diarize_df.loc[distance.idxmin(), "speaker"]
+                for word in seg.get("words", []):
+                    word.setdefault("speaker", seg["speaker"])
     return transcript_result

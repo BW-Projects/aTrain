@@ -81,6 +81,42 @@ def test_one_word_segment_speaker_follows_word_onset():
     assert result["segments"][0]["speaker"] == "A"
 
 
+def gap_result(*words):
+    return {"segments": words_to_segments({"word": w, "start": s, "end": e} for w, s, e in words)}
+
+
+def test_gap_word_takes_nearest_turn():
+    result = gap_result((" So", 2.6, 2.9))
+
+    assign_word_speakers(diarization((0.0, 1.0, "A"), (3.0, 5.0, "B")), result)
+
+    assert result["segments"][0]["speaker"] == "B"
+
+
+def test_gap_word_closer_to_previous_turn():
+    result = gap_result((" So", 1.1, 1.3))
+
+    assign_word_speakers(diarization((0.0, 1.0, "A"), (3.0, 5.0, "B")), result)
+
+    assert result["segments"][0]["speaker"] == "A"
+
+
+def test_words_before_first_turn_take_first_speaker():
+    result = gap_result((" Well", 0.0, 0.3), (" yes", 0.4, 0.6))
+
+    assign_word_speakers(diarization((1.0, 2.0, "A"), (3.0, 5.0, "B")), result)
+
+    assert [s["speaker"] for s in result["segments"]] == ["A", "A"]
+
+
+def test_gap_fill_labels_words():
+    result = gap_result((" So", 2.6, 2.9))
+
+    assign_word_speakers(diarization((0.0, 1.0, "A"), (3.0, 5.0, "B")), result)
+
+    assert result["segments"][0]["words"][0]["speaker"] == "B"
+
+
 def cues(*words, join_raw=False):
     """Group (text, start, end[, speaker]) tuples like the transcription pipeline."""
     segments = words_to_segments({"word": w[0], "start": w[1], "end": w[2]} for w in words)
