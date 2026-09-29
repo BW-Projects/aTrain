@@ -35,6 +35,7 @@ from aTrain_core.outputs import (
     create_file_id,
     create_metadata,
     create_output_files,
+    smooth_speaker_flips,
     transform_speakers_results,
     write_logfile,
 )
@@ -264,5 +265,6 @@ def run_speaker_detection(
     speaker_results = transform_speakers_results(segments)
     write_logfile("Transformed diarization segments", settings.file_id)
     transcript_with_speaker = assign_word_speakers(speaker_results, transcript)
+    smooth_speaker_flips(transcript_with_speaker["segments"])
     write_logfile("Assigned speakers to words", settings.file_id)
     return transcript_with_speaker

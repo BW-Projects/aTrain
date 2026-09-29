@@ -1,6 +1,6 @@
 import pandas as pd
 from aTrain_core.backends.common import group_word_segments, words_to_segments
-from aTrain_core.outputs import assign_word_speakers
+from aTrain_core.outputs import assign_word_speakers, smooth_speaker_flips
 
 
 def diarization(*rows):
@@ -180,3 +180,69 @@ def test_join_raw_keeps_emitted_spacing():
     result = cues((" Hello", 0.0, 0.5), (" world.", 0.6, 1.0), join_raw=True)
 
     assert result == [("Hello world.", 0.0, 1.0)]
+
+
+def speakers(*words):
+    """Smooth (text, start, end, speaker) segments and return their speakers."""
+    segments = [{"text": w[0], "start": w[1], "end": w[2], "speaker": w[3]} for w in words]
+    return [s["speaker"] for s in smooth_speaker_flips(segments)]
+
+
+def test_single_word_flip_mid_sentence_is_absorbed():
+    result = speakers(
+        ("I", 0.0, 0.2, "A"),
+        ("think", 0.3, 0.6, "A"),
+        ("that", 0.7, 0.9, "B"),
+        ("is", 1.0, 1.2, "A"),
+    )
+
+    assert result == ["A", "A", "A", "A"]
+
+
+def test_flip_relabels_words():
+    segments = [
+        {"text": "I", "start": 0.0, "end": 0.2, "speaker": "A"},
+        {"text": "so", "start": 0.3, "end": 0.5, "speaker": "B", "words": [{"speaker": "B"}]},
+        {"text": "go", "start": 0.6, "end": 0.8, "speaker": "A"},
+    ]
+
+    smooth_speaker_flips(segments)
+
+    assert segments[1]["words"][0]["speaker"] == "A"
+
+
+def test_interjection_after_sentence_end_is_kept():
+    result = speakers(("right?", 0.0, 0.4, "A"), ("Yeah.", 0.5, 0.8, "B"), ("So", 0.9, 1.1, "A"))
+
+    assert result == ["A", "B", "A"]
+
+
+def test_flip_with_pause_is_kept():
+    result = speakers(("I", 0.0, 0.2, "A"), ("well", 0.8, 1.0, "B"), ("go", 1.1, 1.3, "A"))
+
+    assert result == ["A", "B", "A"]
+
+
+def test_three_word_run_is_kept():
+    result = speakers(
+        ("I", 0.0, 0.2, "A"),
+        ("no", 0.3, 0.4, "B"),
+        ("no", 0.5, 0.6, "B"),
+        ("no", 0.7, 0.8, "B"),
+        ("go", 0.9, 1.0, "A"),
+    )
+
+    assert result == ["A", "B", "B", "B", "A"]
+
+
+def test_flip_at_start_or_end_is_kept():
+    assert speakers(("so", 0.0, 0.2, "B"), ("I", 0.3, 0.5, "A"), ("go", 0.6, 0.8, "A")) == [
+        "B",
+        "A",
+        "A",
+    ]
+    assert speakers(("I", 0.0, 0.2, "A"), ("go", 0.3, 0.5, "A"), ("so", 0.6, 0.8, "B")) == [
+        "A",
+        "A",
+        "B",
+    ]

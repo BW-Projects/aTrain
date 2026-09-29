@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from aTrain_core.backends.common import ends_sentence
 from aTrain_core.globals import (
     LOG_FILENAME,
     METADATA_FILENAME,
@@ -249,3 +250,29 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
                 for word in seg.get("words", []):
                     word.setdefault("speaker", seg["speaker"])
     return transcript_result
+
+
+def smooth_speaker_flips(segments, max_segments=2, max_gap=0.5):
+    """Relabel short mid-sentence speaker runs enclosed by one other speaker."""
+    i = 0
+    while i < len(segments):
+        j = i
+        while j + 1 < len(segments) and segments[j + 1].get("speaker") == segments[i].get(
+            "speaker"
+        ):
+            j += 1
+        if i > 0 and j + 1 < len(segments):
+            before, after = segments[i - 1], segments[j + 1]
+            if (
+                before.get("speaker") == after.get("speaker")
+                and j - i + 1 <= max_segments
+                and not ends_sentence(before["text"])
+                and segments[i]["start"] - before["end"] < max_gap
+                and after["start"] - segments[j]["end"] < max_gap
+            ):
+                for seg in segments[i : j + 1]:
+                    seg["speaker"] = before["speaker"]
+                    for word in seg.get("words", []):
+                        word["speaker"] = before["speaker"]
+        i = j + 1
+    return segments
