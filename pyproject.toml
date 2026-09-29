@@ -21,6 +21,8 @@ requires-python = ">=3.11"
 dependencies = [
   # Engine (formerly aTrain_core's own dependencies; consolidated post-monorepo merge)
   "faster-whisper==1.2.1",
+  # faster-whisper 1.2.1 passes av.open(metadata_errors=...), which av 19 removed.
+  "av==17.1.0",
   # CrisperWhisper v2 uses this Transformers-only path. Do not add its
   # CTranslate2 extra (a incompatible fork of Ctranslate2 used by faster-whisper):
   "crisperwhisper[transformers]==2.0.3",
