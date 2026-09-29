@@ -248,27 +248,41 @@ def assign_word_speakers(diarize_df, transcript_result, fill_nearest=False):
     return transcript_result
 
 
-def smooth_speaker_flips(segments, max_segments=2, max_gap=0.5):
-    """Relabel short mid-sentence speaker runs enclosed by one other speaker."""
-    i = 0
-    while i < len(segments):
-        j = i
-        while j + 1 < len(segments) and segments[j + 1].get("speaker") == segments[i].get(
-            "speaker"
+def smooth_speaker_flips(segments, max_segments=2, max_gap=1.0):
+    """Give short speaker runs the majority speaker of their sentence.
+
+    A sentence ends at sentence punctuation or at a pause of max_gap or more. A run of up to
+    max_segments is relabeled when another speaker holds more of the sentence's duration.
+    """
+    sentence = []
+    for index, seg in enumerate(segments):
+        sentence.append(seg)
+        if (
+            index + 1 == len(segments)
+            or ends_sentence(seg["text"])
+            or segments[index + 1]["start"] - seg["end"] >= max_gap
         ):
-            j += 1
-        if i > 0 and j + 1 < len(segments):
-            before, after = segments[i - 1], segments[j + 1]
-            if (
-                before.get("speaker") == after.get("speaker")
-                and j - i + 1 <= max_segments
-                and not ends_sentence(before["text"])
-                and segments[i]["start"] - before["end"] < max_gap
-                and after["start"] - segments[j]["end"] < max_gap
-            ):
-                for seg in segments[i : j + 1]:
-                    seg["speaker"] = before["speaker"]
-                    for word in seg.get("words", []):
-                        word["speaker"] = before["speaker"]
-        i = j + 1
+            _relabel_short_runs(sentence, max_segments)
+            sentence = []
     return segments
+
+
+def _relabel_short_runs(sentence, max_segments):
+    """Relabel a sentence's short minority speaker runs to its majority speaker."""
+    durations = {}
+    for seg in sentence:
+        speaker = seg.get("speaker")
+        durations[speaker] = durations.get(speaker, 0) + seg["end"] - seg["start"]
+    majority = max(durations, key=durations.get)
+    i = 0
+    while i < len(sentence):
+        speaker = sentence[i].get("speaker")
+        j = i
+        while j + 1 < len(sentence) and sentence[j + 1].get("speaker") == speaker:
+            j += 1
+        if j - i + 1 <= max_segments and durations[speaker] < durations[majority]:
+            for seg in sentence[i : j + 1]:
+                seg["speaker"] = majority
+                for word in seg.get("words", []):
+                    word["speaker"] = majority
+        i = j + 1

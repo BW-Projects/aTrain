@@ -225,34 +225,69 @@ def test_interjection_after_sentence_end_is_kept():
 
 
 def test_flip_with_pause_is_kept():
-    result = speakers(("I", 0.0, 0.2, "A"), ("well", 0.8, 1.0, "B"), ("go", 1.1, 1.3, "A"))
+    result = speakers(("I", 0.0, 0.2, "A"), ("well", 1.2, 1.4, "B"), ("go", 2.4, 2.6, "A"))
 
     assert result == ["A", "B", "A"]
 
 
 def test_three_word_run_is_kept():
     result = speakers(
-        ("I", 0.0, 0.2, "A"),
-        ("no", 0.3, 0.4, "B"),
-        ("no", 0.5, 0.6, "B"),
-        ("no", 0.7, 0.8, "B"),
-        ("go", 0.9, 1.0, "A"),
+        ("I", 0.0, 0.5, "A"),
+        ("no", 0.6, 0.7, "B"),
+        ("no", 0.8, 0.9, "B"),
+        ("no", 1.0, 1.1, "B"),
+        ("go", 1.2, 1.5, "A"),
     )
 
     assert result == ["A", "B", "B", "B", "A"]
 
 
-def test_flip_at_start_or_end_is_kept():
-    assert speakers(("so", 0.0, 0.2, "B"), ("I", 0.3, 0.5, "A"), ("go", 0.6, 0.8, "A")) == [
-        "B",
+def test_flip_at_sentence_edge_is_absorbed():
+    assert speakers(("so", 0.0, 0.2, "B"), ("I", 0.3, 0.5, "A"), ("go.", 0.6, 0.8, "A")) == [
+        "A",
         "A",
         "A",
     ]
-    assert speakers(("I", 0.0, 0.2, "A"), ("go", 0.3, 0.5, "A"), ("so", 0.6, 0.8, "B")) == [
+    assert speakers(("I", 0.0, 0.2, "A"), ("go", 0.3, 0.5, "A"), ("so.", 0.6, 0.8, "B")) == [
         "A",
         "A",
-        "B",
+        "A",
     ]
+
+
+def test_last_word_of_sentence_stays_with_its_speaker():
+    result = speakers(
+        ("get", 0.0, 0.3, "A"),
+        ("the", 0.3, 0.5, "A"),
+        ("floor.", 0.5, 0.8, "B"),
+        ("No,", 1.0, 1.3, "B"),
+        ("I'm", 1.3, 1.5, "B"),
+    )
+
+    assert result == ["A", "A", "A", "B", "B"]
+
+
+def test_flip_after_sentence_end_joins_next_sentence():
+    result = speakers(
+        ("Jonathan.", 0.0, 0.4, "A"),
+        ("And", 0.6, 0.8, "B"),
+        ("then", 0.8, 1.0, "B"),
+        ("I", 1.0, 1.1, "A"),
+        ("think", 1.1, 1.4, "A"),
+        ("so.", 1.4, 1.7, "A"),
+    )
+
+    assert result == ["A", "A", "A", "A", "A", "A"]
+
+
+def test_interruption_inside_sentence_is_kept():
+    words = [(w, i * 0.3, i * 0.3 + 0.25, "A" if i < 3 else "B") for i, w in enumerate("abcdef")]
+
+    assert speakers(*words) == ["A", "A", "A", "B", "B", "B"]
+
+
+def test_tie_keeps_both_speakers():
+    assert speakers(("well", 0.0, 0.2, "A"), ("go", 0.3, 0.5, "B")) == ["A", "B"]
 
 
 def test_subtitle_cap():
