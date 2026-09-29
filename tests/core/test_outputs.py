@@ -81,13 +81,13 @@ def test_one_word_segment_speaker_follows_word_onset():
     assert result["segments"][0]["speaker"] == "A"
 
 
-def cues(*words):
+def cues(*words, join_raw=False):
     """Group (text, start, end[, speaker]) tuples like the transcription pipeline."""
     segments = words_to_segments({"word": w[0], "start": w[1], "end": w[2]} for w in words)
     for segment, w in zip(segments, words, strict=True):
         if len(w) == 4:
             segment["speaker"] = w[3]
-    return [(c["text"], c["start"], c["end"]) for c in group_word_segments(segments)]
+    return [(c["text"], c["start"], c["end"]) for c in group_word_segments(segments, join_raw)]
 
 
 def test_cue_ends_at_sentence_boundary():
@@ -126,3 +126,21 @@ def test_speaker_change_starts_new_cue():
     result = cues((" Right?", 0.0, 0.5, "A"), (" Yes", 0.6, 1.0, "B"))
 
     assert result == [("Right?", 0.0, 0.5), ("Yes", 0.6, 1.0)]
+
+
+def test_cjk_sentence_end_splits_cue():
+    result = cues(("你好。", 0.0, 3.5), ("我", 3.6, 4.0), join_raw=True)
+
+    assert result == [("你好。", 0.0, 3.5), ("我", 3.6, 4.0)]
+
+
+def test_sentence_end_inside_quotes():
+    result = cues((" said", 0.0, 1.0), (' "done."', 1.0, 3.5), (" Next", 3.6, 4.0))
+
+    assert result == [('said "done."', 0.0, 3.5), ("Next", 3.6, 4.0)]
+
+
+def test_join_raw_keeps_emitted_spacing():
+    result = cues((" Hello", 0.0, 0.5), (" world.", 0.6, 1.0), join_raw=True)
+
+    assert result == [("Hello world.", 0.0, 1.0)]

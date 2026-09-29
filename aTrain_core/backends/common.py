@@ -55,7 +55,13 @@ def _append_word_text(text: str, word: str) -> str:
     return f"{text} {word}"
 
 
-SENTENCE_END = (".", "?", "!", "…")
+SENTENCE_END = (".", "?", "!", "…", "。", "？", "！")  # noqa: RUF001
+_CLOSERS = "\"'”’»)]」』"  # noqa: RUF001
+
+
+def ends_sentence(text: str) -> bool:
+    """Return True when text ends a sentence, ignoring closing quotes and brackets."""
+    return text.rstrip(_CLOSERS).endswith(SENTENCE_END)
 
 
 def group_word_segments(segments: list[dict], join_raw: bool = False) -> list[dict]:
@@ -74,7 +80,7 @@ def group_word_segments(segments: list[dict], join_raw: bool = False) -> list[di
         gap = segment["start"] - current["end"]
         same_speaker = segment.get("speaker") == current.get("speaker")
         within_duration = segment["end"] - current["start"] <= 20.0
-        sentence_done = current["text"].endswith(SENTENCE_END)
+        sentence_done = ends_sentence(current["text"])
         long_enough = current["end"] - current["start"] >= 3.0
         if not same_speaker or gap >= 2.0 or not within_duration or (sentence_done and long_enough):
             grouped.append({**segment, "words": list(segment.get("words", []))})
