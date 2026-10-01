@@ -22,6 +22,9 @@ Two roles are involved:
 - The model has a Whisper architecture, either already converted for
   faster-whisper (CTranslate2) or in Hugging Face transformers format.
 - The transcription quality of real recordings in its target language is good.
+- If the model needs a backend aTrain does not have yet, open a pull request
+  first that weighs the cost of the new backend against what the model offers
+  over the models that run on the existing backends.
 
 ## 2. Mirror it under aTrain-core (maintainers)
 
@@ -29,12 +32,19 @@ Most mirrors are plain copies of models that already come in the
 faster-whisper format. Only if a model doesn't, convert it:
 
 ```bash
-ct2-transformers-converter --model <source repo> --output_dir <folder> \
-  --copy_files tokenizer.json preprocessor_config.json --quantization float16
+ct2-transformers-converter --model <source repo> --revision <commit> \
+  --output_dir <folder> --copy_files tokenizer.json preprocessor_config.json \
+  --quantization float16
 ```
 
+Pin the source with `--revision` so the mirror's README can say exactly what was
+converted. A conversion can finish without errors and still degrade the output
+badly, so transcribe a few recordings in the target language with the
+converted model and compare them with the source model before uploading.
+
 Upload the folder to a new model repo under aTrain-core, add the licence file
-and a README naming the source, and note the commit hash of the upload.
+and a README naming the source and its commit, and note the commit hash of the
+upload. This is done manually by the maintainers.
 
 Every file in the repo gets pinned and downloaded, so keep only these:
 
