@@ -248,6 +248,7 @@ wheels = [
 name = "atrain"
 source = { editable = "." }
 dependencies = [
+    { name = "av" },
     { name = "crisperwhisper", extra = ["transformers"] },
     { name = "faster-whisper" },
     { name = "huggingface-hub" },
@@ -284,6 +285,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "av", specifier = "<19" },
     { name = "crisperwhisper", extras = ["transformers"], specifier = "==2.0.3" },
     { name = "dask", marker = "sys_platform == 'linux' and extra == 'gui'" },
     { name = "faster-whisper", specifier = "==1.2.1" },
