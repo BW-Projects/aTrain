@@ -155,7 +155,6 @@ def run_transcription(
             beam_size=5,
             word_timestamps=True,
             language=None if settings.language == "auto-detect" else settings.language,
-            max_new_tokens=None if model_type == "distil" else 128,
             no_speech_threshold=0.6,
             condition_on_previous_text=False if model_type == "distil" else True,
             initial_prompt=settings.initial_prompt,
