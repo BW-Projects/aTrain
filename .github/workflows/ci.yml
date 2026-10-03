@@ -179,8 +179,6 @@ jobs:
     timeout-minutes: 30
     env:
       ATRAIN_TEST_CRISPER: "1"
-      ATRAIN_USER_DIR: ${{ runner.temp }}/atrain-crisper
-      HF_HOME: ${{ runner.temp }}/crisper-hf
 
     steps:
       - name: Checkout
@@ -207,6 +205,9 @@ jobs:
             --index-strategy unsafe-best-match
 
       - name: Check real CrisperWhisper transcription and attention outputs
+        env:
+          ATRAIN_USER_DIR: ${{ runner.temp }}/atrain-crisper
+          HF_HOME: ${{ runner.temp }}/crisper-hf
         run: .venv/bin/python -m pytest tests/core/test_crisper_transformers_e2e.py -v
 
   e2e-app:
