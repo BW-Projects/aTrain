@@ -56,9 +56,9 @@ path and the engine reads the file in place.
 **Outbound traffic.** A reachability check and the model downloads, both to
 huggingface.co and both only when a model is downloaded; see the privacy
 section of the [Code signing policy](../code-signing-policy.md#privacy). With
-folder, aTrain makes no network request at all and can also run on an air-gapped
-folder, aTrain makes no network request at all and runs on an air-gapped
-machine.
+the models in place, from a build that bundles them or copied into the models
+folder, aTrain makes no network request at all and can also run on an
+air-gapped machine.
 
 **Flatpak.** The sandbox limits file access to the documents folder, the app's
 own folder under `~/.var/app` and files picked through the portal. It shares
