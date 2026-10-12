@@ -40,7 +40,7 @@ dependencies = [
   "torchaudio==2.9.1+cu128; sys_platform == 'win32'",
   "torchaudio==2.9.1; sys_platform != 'win32'",
   "typer==0.27.2",
-  "platformdirs==4.12.2",
+  "platformdirs==4.12.3",
   "jiwer==4.0.0",
 ]
 
