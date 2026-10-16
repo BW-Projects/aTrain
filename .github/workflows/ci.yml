@@ -15,6 +15,43 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+
+    steps:
+      - name: Checkout
+        # On pull_request the checkout is the PR merge commit, whose first
+        # parent is the base branch. Depth 2 is enough to diff against it.
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Detect docs-only changes
+        # The e2e jobs below take long and download models. A PR that only
+        # touches Markdown or docs/ cannot change their outcome, so they skip.
+        # Pushes to develop/main always run everything. A skipped job counts
+        # as passed for required status checks.
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Own command, so a failing diff fails the job instead of skipping.
+          files=$(git diff --name-only HEAD^1 HEAD)
+          code=$(echo "$files" | grep -vE '(\.md$|^docs/)' || true)
+          if [ -n "$code" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Docs-only change, skipping e2e jobs."
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   lint:
     name: ruff
     runs-on: ubuntu-latest
@@ -143,6 +180,8 @@ jobs:
 
   e2e:
     name: e2e (core pipeline)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -175,6 +214,8 @@ jobs:
 
   e2e-app:
     name: e2e (app, full stack)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -215,6 +256,8 @@ jobs:
 
   e2e-browser:
     name: e2e (real browser, Chromium)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
