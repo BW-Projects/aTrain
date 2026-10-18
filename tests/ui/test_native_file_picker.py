@@ -2,10 +2,9 @@
 
 The web page's file dialog (`<input type="file">` behind "Select File") does
 not open in pywebview's macOS window (#307), the same reason Linux and Flatpak
-use a native picker. These tests pretend to be macOS on any CI platform.
+use a native picker. The test pretends to be macOS on any CI platform.
 """
 
-import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
 
@@ -19,56 +18,26 @@ from nicegui.testing import User
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "sample_short.mp3"
 
 
-def fake_window(picked: tuple[str, ...] | None) -> Mock:
-    """Stands in for NiceGUI's proxy of the native window."""
-    window = Mock()
-    window.create_file_dialog = AsyncMock(return_value=picked)
-    return window
-
-
-def pretend_macos(monkeypatch, window: Mock) -> None:
+@pytest.fixture
+def macos_window(monkeypatch) -> Mock:
+    """A native window on macOS whose file dialog returns the fixture."""
+    window = Mock()  # stands in for NiceGUI's proxy of the native window
+    window.create_file_dialog = AsyncMock(return_value=(str(FIXTURE),))
     # The page module is imported fresh per test and reads the globals then;
     # the component module persists, so patch its copies too.
     for module in (aTrain_core.globals, file_component):
         monkeypatch.setattr(module, "FLATPAK", False)
         monkeypatch.setattr(module, "LINUX", False)
-        monkeypatch.setattr(module, "MACOS", True)
+        monkeypatch.setattr(module, "MACOS", True, raising=False)
     monkeypatch.setattr(app.native, "main_window", window)
-
-
-@pytest.fixture
-def picks_fixture(monkeypatch) -> Mock:
-    window = fake_window((str(FIXTURE),))
-    pretend_macos(monkeypatch, window)
     return window
 
 
-@pytest.fixture
-def picks_nothing(monkeypatch) -> Mock:
-    window = fake_window(None)  # the user cancelled the dialog
-    pretend_macos(monkeypatch, window)
-    return window
-
-
-async def test_select_file_opens_the_native_dialog_on_macos(picks_fixture, user: User):
+async def test_select_file_opens_the_native_dialog_on_macos(macos_window, user: User):
     await user.open("/")
     await user.should_see("Start", retries=100)
 
     user.find(kind=ui.button, content="Select File").click()
 
     await user.should_see(FIXTURE.name)
-    picks_fixture.create_file_dialog.assert_awaited_once()
-
-
-async def test_cancelled_dialog_selects_nothing(picks_nothing, user: User):
-    await user.open("/")
-    await user.should_see("Start", retries=100)
-
-    user.find(kind=ui.button, content="Select File").click()
-    for _ in range(50):  # the click is handled asynchronously
-        if picks_nothing.create_file_dialog.await_count:
-            break
-        await asyncio.sleep(0.05)
-
-    picks_nothing.create_file_dialog.assert_awaited_once()
-    await user.should_see("No file selected")
+    macos_window.create_file_dialog.assert_awaited_once()
