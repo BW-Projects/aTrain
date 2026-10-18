@@ -102,5 +102,8 @@ app = BUNDLE(
         'NSFileAccessUsageDescription': 'aTrain needs access to specific folders for its functionality. Please grant this access in System Preferences > Security & Privacy > Privacy > Files and Folders.',
         'ITSAppUsesNonExemptEncryption': False,
         'LSMinimumSystemVersion': '14.0',
+        # App Nap throttles the app while its window is in the background (#307:
+        # 12 minutes instead of 22 s for a 12 s file, transcribing in a browser).
+        'LSAppNapIsDisabled': True,
     },
 )
