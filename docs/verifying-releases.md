@@ -18,6 +18,11 @@ Every release is a git tag `v<version>` and a GitHub release built from it by
 | `aTrain-<version>-windows.cdx.json` | GitHub release | CycloneDX SBOM of the Windows build. |
 | `aTrain-<version>-source.tar.gz` | GitHub (tag archive) | Source at the tag; its hash is in `checksums.txt`. |
 
+The macOS build is not part of the release yet. The `aTrain-macos-<version>`
+workflow artifact contains `aTrain-<version>-macos-arm64.dmg` (Apple silicon,
+unsigned and not notarized), its SBOM `aTrain-<version>-macos.cdx.json`, and
+`checksums-macos.txt` with the SHA-256 of both.
+
 Under Actions, the `aTrain-msix-<version>` workflow artifact contains the
 unsigned build; its installer hash does not match the release's `checksums.txt`.
 The `signed-aTrain-<version>` workflow artifact contains the signed installer
@@ -45,6 +50,17 @@ Linux/macOS:
 ```bash
 sha256sum -c checksums.txt --ignore-missing
 ```
+
+macOS (Apple silicon DMG, from the Actions artifact): compare the hash of the
+disk image with the matching line in `checksums-macos.txt`:
+
+```bash
+shasum -a 256 aTrain-<version>-macos-arm64.dmg
+```
+
+The macOS build is unsigned for now, so there is no signature to verify, and
+Gatekeeper blocks the first launch. Only after the checksum matches, open it
+through System Settings → Privacy & Security → Open Anyway.
 
 A mismatch means a corrupted download or a file that is not the released one.
 Do not install it; download again, then report if it persists (see below).
