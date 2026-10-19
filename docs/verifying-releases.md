@@ -17,11 +17,12 @@ Every release is a git tag `v<version>` and a GitHub release built from it by
 | `checksums.txt` | GitHub release and Zenodo | SHA-256 of every file below, computed after signing. Both copies are identical. |
 | `aTrain-<version>-windows.cdx.json` | GitHub release | CycloneDX SBOM of the Windows build. |
 | `aTrain-<version>-source.tar.gz` | GitHub (tag archive) | Source at the tag; its hash is in `checksums.txt`. |
+| `aTrain-<version>-macos-arm64.dmg` | Zenodo | macOS disk image, Apple silicon, unsigned and not notarized. |
+| `checksums-macos.txt` | GitHub release and Zenodo | SHA-256 of the DMG and its SBOM. |
+| `aTrain-<version>-macos.cdx.json` | GitHub release and Zenodo | CycloneDX SBOM of the macOS build. |
 
-The macOS build is not part of the release yet. The `aTrain-macos-<version>`
-workflow artifact contains `aTrain-<version>-macos-arm64.dmg` (Apple silicon,
-unsigned and not notarized), its SBOM `aTrain-<version>-macos.cdx.json`, and
-`checksums-macos.txt` with the SHA-256 of both.
+The `aTrain-macos-<version>` workflow artifact contains the same three macOS
+files.
 
 Under Actions, the `aTrain-msix-<version>` workflow artifact contains the
 unsigned build; its installer hash does not match the release's `checksums.txt`.
@@ -51,8 +52,8 @@ Linux/macOS:
 sha256sum -c checksums.txt --ignore-missing
 ```
 
-macOS (Apple silicon DMG, from the Actions artifact): compare the hash of the
-disk image with the matching line in `checksums-macos.txt`:
+macOS (Apple silicon DMG): compare the hash of the disk image with the
+matching line in `checksums-macos.txt` from the GitHub release:
 
 ```bash
 shasum -a 256 aTrain-<version>-macos-arm64.dmg

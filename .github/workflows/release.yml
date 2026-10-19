@@ -7,9 +7,9 @@ name: Release
 # and stay available as workflow artifacts, since they exceed the 2 GiB
 # release-asset limit; the GitHub release carries the sha256 checksums
 # and the CycloneDX SBOM (#213) for verification. Flatpak (needs Flathub
-# manifest refresh) is a follow-up. An unsigned Apple silicon macOS DMG is
-# built as a workflow artifact (not yet signed or notarized, and not
-# published to Zenodo or the release).
+# manifest refresh) is a follow-up. An Apple silicon macOS DMG (not yet
+# signed or notarized) is added to the same Zenodo draft, its checksums and
+# SBOM to the release.
 
 on:
   push:
@@ -663,3 +663,53 @@ jobs:
           cat app-start.log
           exit "$status"
 
+  publish-macos-to-zenodo:
+    name: Publish macOS DMG to Zenodo (draft)
+    # A job of its own like `publish-to-zenodo`, so a failed upload is re-run
+    # without rebuilding. After it, because the DMG goes into the draft that
+    # job creates (ZENODO_APPEND), and only once the DMG started on macOS 27.
+    needs: [build-macos-dmg, macos27-app-start, publish-to-zenodo]
+    if: startsWith(github.ref, 'refs/tags/v') && !inputs.bundle_models
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # See `publish-to-zenodo`.
+      ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download the DMG, SBOM and checksums
+        uses: actions/download-artifact@v8
+        with:
+          name: aTrain-macos-${{ needs.build-macos-dmg.outputs.version }}
+          path: artifacts
+
+      - name: Verify the checksums
+        # Covers the artifact round-trip; the DMG is not re-signed, so the
+        # build job's checksums still hold.
+        working-directory: artifacts
+        run: sha256sum -c checksums-macos.txt
+
+      - name: Attach checksums and SBOM to the GitHub release
+        # The release exists: `sign-windows-msix` creates it, see there.
+        working-directory: artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "v${{ needs.build-macos-dmg.outputs.version }}" \
+            checksums-macos.txt aTrain-*.cdx.json --clobber
+
+      - name: Add the DMG to the Zenodo draft
+        env:
+          ZENODO_BASE: ${{ vars.ZENODO_BASE }}
+          ZENODO_CONCEPT_ID: ${{ vars.ZENODO_CONCEPT_ID }}
+          ZENODO_APPEND: "1"
+        run: |
+          if [[ -z "${ZENODO_TOKEN:-}" ]]; then
+            echo "::notice::No ZENODO_TOKEN configured - skipping the Zenodo upload."
+            exit 0
+          fi
+          .github/scripts/zenodo-upload.sh "${{ needs.build-macos-dmg.outputs.version }}" \
+            artifacts/aTrain-* artifacts/checksums-macos.txt
