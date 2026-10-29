@@ -28,7 +28,7 @@ dependencies = [
   "crisperwhisper[transformers]==2.0.3",
   # 5.17 is the first release with Parakeet TDT, Qwen3-ASR and Canary support.
   "transformers==5.17.0",
-  "pandas==3.0.6",
+  "pandas==3.1.0",
   "pyannote.audio==4.0.7",
   "numpy==2.4.6",
   # Transformers 5.17 requires Hub >=1.5,<2; download and inference paths
@@ -40,8 +40,8 @@ dependencies = [
   # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
   "torchaudio==2.9.1+cu128; sys_platform == 'win32'",
   "torchaudio==2.9.1; sys_platform != 'win32'",
-  "typer==0.27.2",
-  "platformdirs==4.12.2",
+  "typer==0.27.3",
+  "platformdirs==4.13.5",
   "jiwer==4.0.0",
 ]
 
@@ -51,7 +51,7 @@ dependencies = [
 # headless CLI (`aTrain_core transcribe …`, `aTrain init`) works on the
 # base install.
 gui = [
-  "nicegui==3.17.1",
+  "nicegui==3.18.0",
   "pywebview==6.2.1",
   "pywebview[GTK]; sys_platform == 'linux'",
   "show-in-file-manager==1.1.6",

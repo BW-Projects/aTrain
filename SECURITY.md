@@ -10,7 +10,7 @@ Old versions are available for download under https://business-analytics.uni-gra
 
 ## Reporting a Vulnerability
 
-Please contact us directly via [atrain@uni-graz](mailto:atrain@uni-graz) to report a vulnerability.
+Please contact us directly via [atrain@uni-graz.at](mailto:atrain@uni-graz.at) to report a vulnerability.
 Please add at least the following details:
 
 - name the subject "Security issue with aTrain"
