@@ -1,13 +1,17 @@
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import Annotated, cast
 
+from aTrain_core.event_log import log_event, log_unhandled_exception, setup_event_log
 from aTrain_core.globals import ATRAIN_DIR, FLATPAK, REQUIRED_MODELS
-from aTrain_core.load_resources import get_model
+from aTrain_core.integrity import ModelIntegrityError
+from aTrain_core.load_resources import get_model, model_is_complete, model_url
 from typer import Option, Typer
 
 from aTrain.utils.hosts import bind_host, host_check_applies, restrict_to_loopback_hosts
+from aTrain.version import __version__
 
 cli = Typer(help="CLI for aTrain.")
 
@@ -15,8 +19,22 @@ cli = Typer(help="CLI for aTrain.")
 @cli.command()
 def init():
     """Download all required model for aTrain."""
+    setup_event_log()
     for model in REQUIRED_MODELS:
-        get_model(model=model)
+        complete = model_is_complete(model)
+        if not complete:
+            log_event("model_download_started", model=model, url=model_url(model))
+        try:
+            get_model(model=model)
+        except Exception as error:
+            checksum = {"checksum": "failed"} if isinstance(error, ModelIntegrityError) else {}
+            error_text = f"{type(error).__name__}: {error}"
+            log_event(
+                "model_download_failed", logging.ERROR, model=model, error=error_text, **checksum
+            )
+            raise
+        if not complete:
+            log_event("model_download_finished", model=model, checksum="ok")
 
 
 @cli.command()
@@ -54,7 +72,7 @@ def start(
             user_config_path() / "aTrain" if FLATPAK else (ATRAIN_DIR / "settings")
         )
         with patch.dict(os.environ, NICEGUI_STORAGE_PATH=str(nicegui_storage_path)):
-            from nicegui import run, ui
+            from nicegui import app, run, ui
 
             from aTrain.pages import about, archive, faq, models, transcribe  # noqa
         from wakepy import keep
@@ -89,8 +107,26 @@ def start(
     if host_check_applies(host, allow_any_host):
         restrict_to_loopback_hosts()
 
-    if FLATPAK:
-        ui_run(native, reload, show, host, port)
-    else:
-        with keep.running():
+    setup_event_log()
+    log_event(
+        "server_started",
+        version=__version__,
+        native=native,
+        host=host,
+        port=port,
+        allow_any_host=allow_any_host,
+    )
+    app.on_shutdown(lambda: log_event("server_stopped"))
+    app.on_exception(log_unhandled_exception)
+
+    try:
+        if FLATPAK:
             ui_run(native, reload, show, host, port)
+        else:
+            with keep.running():
+                ui_run(native, reload, show, host, port)
+    except Exception as error:
+        # An exception here ends aTrain. The Windows build has no console, so the
+        # event log is the only place that records it.
+        log_unhandled_exception(error)
+        raise

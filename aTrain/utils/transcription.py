@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import traceback
 from concurrent.futures.process import BrokenProcessPool
 from dataclasses import dataclass
@@ -10,6 +12,8 @@ from aTrain.components.dialogs.error import dialog_error
 from aTrain.components.dialogs.finished import dialog_finished
 from aTrain.components.dialogs.process import close_dialog_process, dialog_process
 from aTrain.utils.archive import delete_transcription
+from aTrain_core.event_log import log_event
+from aTrain_core.load_resources import model_is_complete, model_url
 from aTrain_core.settings import ComputeType, Device, Settings, check_inputs_transcribe
 from nicegui import app, events, run, ui
 from nicegui.run import SubprocessException
@@ -54,6 +58,15 @@ class UploadPayload:
         await self.upload.save(target)
         return target
 
+    def size(self) -> int | None:
+        try:
+            if self.path is not None:
+                return self.path.stat().st_size
+            return self.upload.size() if self.upload is not None else None
+        except OSError:
+            # The file can be gone by now. Log the event without a size instead of failing.
+            return None
+
 
 async def start_transcription(file: events.UploadEventArguments):
     """NiceGUI `on_upload` handler (browser upload path)."""
@@ -70,6 +83,7 @@ async def run_pipeline(payload: UploadPayload):
     from aTrain_core.transcribe import prepare_transcription, transcribe
 
     file_id: str | None = None
+    rejected = False
     with Manager() as manager, TemporaryDirectory() as tmp_dir:
         progress = manager.dict({"task": "Prepare", "current": 0, "total": 999999})
         dialog_process(progress)
@@ -83,7 +97,21 @@ async def run_pipeline(payload: UploadPayload):
             # Validate first: it needs nothing but the name and the settings, and
             # rejecting a wrong model or language should not cost a directory and
             # a full copy of the upload beforehand.
-            check_inputs_transcribe(payload.name, state.get("model"), state.get("language"), device)
+            try:
+                check_inputs_transcribe(
+                    payload.name, state.get("model"), state.get("language"), device
+                )
+            except ValueError as e:
+                rejected = True
+                log_event(
+                    "file_rejected",
+                    logging.WARNING,
+                    file_name=payload.name,
+                    size=payload.size(),
+                    reason=str(e),
+                )
+                raise
+            log_event("file_accepted", file_name=payload.name, size=payload.size())
             safe_file, file_id, timestamp = prepare_transcription(Path(payload.name))
             source = await payload.materialise(Path(tmp_dir), safe_file.name)
             settings = Settings(
@@ -102,11 +130,37 @@ async def run_pipeline(payload: UploadPayload):
                 cpu_threads=int(state.get("cpu_threads", 0)) or 0,
                 progress=progress,
             )
-            await run.cpu_bound(transcribe, settings=settings)
+            # The worker's get_model() downloads a missing model without telling the
+            # server, so the server logs the download here.
+            needed = [state.get("model")]
+            if state.get("speaker_detection"):
+                needed.append("speaker-detection")
+            missing = [model for model in needed if not model_is_complete(model)]
+            for model in missing:
+                log_event("model_download_by_transcription", model=model, url=model_url(model))
+            log_event(
+                "transcription_started",
+                file_id=file_id,
+                model=state.get("model"),
+                device=device.value,
+            )
+            # transcribe() did not run: the stop button was pressed while no worker
+            # ran, or the server shuts down. NiceGUI 3 then returns None and NiceGUI 4
+            # raises CancelledError. Both end in the stop branch below.
+            if await run.cpu_bound(transcribe, settings=settings) is None:
+                raise asyncio.CancelledError()
+            for model in missing:
+                # A model that is complete now was downloaded and verified by get_model().
+                # The worker skips speaker detection for an empty transcript, so that
+                # model can still be missing.
+                if model_is_complete(model):
+                    log_event("model_download_finished", model=model, checksum="ok")
+            log_event("transcription_finished", file_id=file_id)
             close_dialog_process()
             dialog_finished(file_id)
 
-        except BrokenProcessPool:
+        except (BrokenProcessPool, asyncio.CancelledError):
+            log_event("transcription_stopped", file_id=file_id)
             if file_id is not None:
                 delete_transcription(file_id)
             setup_process_pool()
@@ -114,9 +168,13 @@ async def run_pipeline(payload: UploadPayload):
             ui.navigate.reload()
 
         except SubprocessException as e:
+            error = f"{e.original_type}: {e.original_message}"
+            log_event("transcription_failed", logging.ERROR, file_id=file_id, error=error)
             close_dialog_process()
             dialog_error(error=e.original_message, traceback=e.original_traceback)
 
         except Exception as e:
+            if not rejected:  # file_rejected is already in the log
+                log_event("transcription_failed", logging.ERROR, file_id=file_id, error=str(e))
             close_dialog_process()
             dialog_error(error=str(e), traceback=traceback.format_exc())
