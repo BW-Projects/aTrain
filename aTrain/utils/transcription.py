@@ -1,3 +1,4 @@
+import logging
 import traceback
 from concurrent.futures.process import BrokenProcessPool
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ from aTrain.components.dialogs.error import dialog_error
 from aTrain.components.dialogs.finished import dialog_finished
 from aTrain.components.dialogs.process import close_dialog_process, dialog_process
 from aTrain.utils.archive import delete_transcription
+from aTrain_core.event_log import log_event
+from aTrain_core.load_resources import model_is_complete, model_url
 from aTrain_core.settings import ComputeType, Device, Settings, check_inputs_transcribe
 from nicegui import app, events, run, ui
 from nicegui.run import SubprocessException
@@ -54,6 +57,11 @@ class UploadPayload:
         await self.upload.save(target)
         return target
 
+    def size(self) -> int | None:
+        if self.path is not None:
+            return self.path.stat().st_size
+        return self.upload.size() if self.upload is not None else None
+
 
 async def start_transcription(file: events.UploadEventArguments):
     """NiceGUI `on_upload` handler (browser upload path)."""
@@ -83,7 +91,20 @@ async def run_pipeline(payload: UploadPayload):
             # Validate first: it needs nothing but the name and the settings, and
             # rejecting a wrong model or language should not cost a directory and
             # a full copy of the upload beforehand.
-            check_inputs_transcribe(payload.name, state.get("model"), state.get("language"), device)
+            try:
+                check_inputs_transcribe(
+                    payload.name, state.get("model"), state.get("language"), device
+                )
+            except ValueError as e:
+                log_event(
+                    "file_rejected",
+                    logging.WARNING,
+                    file=payload.name,
+                    size=payload.size(),
+                    reason=str(e),
+                )
+                raise
+            log_event("file_accepted", file=payload.name, size=payload.size())
             safe_file, file_id, timestamp = prepare_transcription(Path(payload.name))
             source = await payload.materialise(Path(tmp_dir), safe_file.name)
             settings = Settings(
@@ -102,11 +123,26 @@ async def run_pipeline(payload: UploadPayload):
                 cpu_threads=int(state.get("cpu_threads", 0)) or 0,
                 progress=progress,
             )
+            # get_model() in the worker fetches a missing model without telling this process.
+            needed = [state.get("model")]
+            if state.get("speaker_detection"):
+                needed.append("speaker-detection")
+            for model in needed:
+                if not model_is_complete(model):
+                    log_event("model_download_by_transcription", model=model, url=model_url(model))
+            log_event(
+                "transcription_started",
+                file_id=file_id,
+                model=state.get("model"),
+                device=device.value,
+            )
             await run.cpu_bound(transcribe, settings=settings)
+            log_event("transcription_finished", file_id=file_id)
             close_dialog_process()
             dialog_finished(file_id)
 
         except BrokenProcessPool:
+            log_event("transcription_stopped", file_id=file_id)
             if file_id is not None:
                 delete_transcription(file_id)
             setup_process_pool()
@@ -114,9 +150,13 @@ async def run_pipeline(payload: UploadPayload):
             ui.navigate.reload()
 
         except SubprocessException as e:
+            error = f"{e.original_type}: {e.original_message}"
+            log_event("transcription_failed", logging.ERROR, file_id=file_id, error=error)
             close_dialog_process()
             dialog_error(error=e.original_message, traceback=e.original_traceback)
 
         except Exception as e:
+            if file_id is not None:  # otherwise the file was rejected and that is logged
+                log_event("transcription_failed", logging.ERROR, file_id=file_id, error=str(e))
             close_dialog_process()
             dialog_error(error=str(e), traceback=traceback.format_exc())

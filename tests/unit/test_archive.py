@@ -134,6 +134,42 @@ def test_read_archive_merges_file_and_dirname_metadata(archive_root):
 # --- delete_transcription --------------------------------------------------
 
 
+def _event_log(monkeypatch):
+    """Collect the events log_event writes in the module under test."""
+    events = []
+    monkeypatch.setattr(
+        archive, "log_event", lambda event, **fields: events.append((event, fields))
+    )
+    return events
+
+
+def test_delete_transcription_logs_the_id(archive_root, monkeypatch):
+    events = _event_log(monkeypatch)
+    (archive_root / "rec3").mkdir(parents=True)
+
+    archive.delete_transcription("rec3")
+
+    assert events == [("transcript_deleted", {"file_id": "rec3"})]
+
+
+def test_delete_all_logs_all(archive_root, monkeypatch):
+    events = _event_log(monkeypatch)
+    (archive_root / "rec3").mkdir(parents=True)
+
+    archive.delete_transcription("all")
+
+    assert events == [("transcript_deleted", {"file_id": "all"})]
+
+
+def test_delete_transcription_logs_nothing_when_nothing_was_there(archive_root, monkeypatch):
+    events = _event_log(monkeypatch)
+    archive_root.mkdir(parents=True)
+
+    archive.delete_transcription("never-existed")
+
+    assert events == []
+
+
 def test_delete_transcription_removes_dir(archive_root):
     d = archive_root / "rec3"
     d.mkdir(parents=True)

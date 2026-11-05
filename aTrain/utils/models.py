@@ -1,3 +1,4 @@
+import logging
 import os
 import traceback
 from concurrent.futures.process import BrokenProcessPool
@@ -5,8 +6,15 @@ from multiprocessing import Manager
 
 from aTrain.components.dialogs.download import close_dialog_download, dialog_download
 from aTrain.components.dialogs.error import dialog_error
+from aTrain_core.event_log import log_event
 from aTrain_core.globals import MODELS_DIR, REQUIRED_MODELS_DIR
-from aTrain_core.load_resources import get_model, load_model_config_file, remove_model
+from aTrain_core.load_resources import (
+    get_model,
+    load_model_config_file,
+    model_is_complete,
+    model_url,
+    remove_model,
+)
 from aTrain_core.settings import load_languages
 from huggingface_hub.utils import get_session
 from nicegui import run, ui
@@ -90,23 +98,35 @@ async def download_model(model: str):
         progress = manager.dict({"current": 0, "total": 999999})
         dialog_download(progress, model)
         try:
+            complete = model_is_complete(model)
+            if not complete:
+                log_event("model_download_started", model=model, url=model_url(model))
             check_internet()
             await run.cpu_bound(get_model, model=model, progress=progress)
+            if complete:
+                log_event("model_already_complete", model=model)
+            else:
+                log_event("model_download_finished", model=model, checksum="ok")
             close_dialog_download()
             ui.navigate.reload()
 
         except BrokenProcessPool:
+            log_event("model_download_stopped", model=model)
             remove_model(model)
             setup_process_pool()
             close_dialog_download()
             ui.navigate.reload()
 
         except SubprocessException as e:
+            checksum = {"checksum": "failed"} if e.original_type == "ModelIntegrityError" else {}
+            error = f"{e.original_type}: {e.original_message}"
+            log_event("model_download_failed", logging.ERROR, model=model, error=error, **checksum)
             remove_model(model)
             close_dialog_download()
             dialog_error(error=e.original_message, traceback=e.original_traceback)
 
         except Exception as e:
+            log_event("model_download_failed", logging.ERROR, model=model, error=str(e))
             remove_model(model)
             close_dialog_download()
             dialog_error(str(e), traceback.format_exc())
