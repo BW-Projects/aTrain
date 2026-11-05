@@ -21,8 +21,10 @@ continues with the commands for administrators.
 | `%USERPROFILE%\Documents\aTrain\settings\`          | the options last used in the app                        | no                   | no            |
 
 `Documents\aTrain` moves to the path in the `ATRAIN_USER_DIR` environment
-variable when that is set. aTrain writes nothing under `%LOCALAPPDATA%\aTrain`
-and keeps no global Hugging Face cache: model downloads go straight into the
+variable when that is set. The package folder under `%LOCALAPPDATA%\Packages`
+also holds the event log, `LocalCache\Local\aTrain\Logs\`, with the file names
+of transcribed recordings. aTrain writes nothing to the plain
+`%LOCALAPPDATA%\aTrain` and keeps no global Hugging Face cache: model downloads go straight into the
 model folder, including the download bookkeeping in its `.cache` subfolder.
 
 Two package identities exist: the Microsoft Store
@@ -91,6 +93,7 @@ lives there.
 | Application menu entry                                        |                                   | yes                  |               |
 | `~/.var/app/io.github.juergenfleiss.aTrain/data/models/`      | downloaded models, several GB     | with `--delete-data` | no            |
 | `~/.var/app/io.github.juergenfleiss.aTrain/config/aTrain/`    | the options last used in the app  | with `--delete-data` | no            |
+| `~/.var/app/io.github.juergenfleiss.aTrain/.local/state/aTrain/log/` | the event log with file names | with `--delete-data` | yes |
 | `~/.var/app/io.github.juergenfleiss.aTrain/cache/`            | library caches and temp files; harmless | with `--delete-data` | no      |
 | `~/Documents/aTrain/transcriptions/`                          | one folder per transcription: text, `metadata.txt`, `log.txt` | no | **yes** |
 
@@ -122,6 +125,9 @@ rm -rf ~/Documents/aTrain
   decommissioned or a user leaves. From inside the app, the **Delete All**
   button in the Archive tab does the same for the current profile; models and
   settings stay.
+- **The event log** holds the file names of transcribed recordings and stays
+  after **Delete All**. See [Operations](operations.md) for its location and
+  delete it when a machine is decommissioned or a user leaves.
 - **Models** are large but contain no personal data. They can also be removed
   one by one on the Models page of the app.
 - **Settings** hold the options last used in the app.

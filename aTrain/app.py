@@ -3,9 +3,12 @@ import sys
 from pathlib import Path
 from typing import Annotated, cast
 
+from aTrain_core.event_log import log_event, log_unhandled_exception, setup_event_log
 from aTrain_core.globals import ATRAIN_DIR, FLATPAK, REQUIRED_MODELS
 from aTrain_core.load_resources import get_model
 from typer import Option, Typer
+
+from aTrain.version import __version__
 
 cli = Typer(help="CLI for aTrain.")
 
@@ -48,7 +51,7 @@ def start(
             user_config_path() / "aTrain" if FLATPAK else (ATRAIN_DIR / "settings")
         )
         with patch.dict(os.environ, NICEGUI_STORAGE_PATH=str(nicegui_storage_path)):
-            from nicegui import run, ui
+            from nicegui import app, run, ui
 
             from aTrain.pages import about, archive, faq, models, transcribe  # noqa
         from wakepy import keep
@@ -59,6 +62,11 @@ def start(
         )
 
     print("Running aTrain")
+
+    setup_event_log()
+    log_event("server_started", version=__version__, native=native, host=host, port=port)
+    app.on_shutdown(lambda: log_event("server_stopped"))
+    app.on_exception(log_unhandled_exception)
 
     def ui_run(native: bool, reload: bool, show: bool, host: str, port: int):
         # A worker pool forked from the running server stops all page updates
