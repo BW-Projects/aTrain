@@ -6,6 +6,7 @@ import zipfile
 from importlib.resources import files
 
 import yaml
+from aTrain_core.event_log import file_id_for_log, log_event
 from aTrain_core.globals import METADATA_FILENAME, TRANSCRIPT_DIR
 from showinfm import show_in_file_manager
 
@@ -61,12 +62,15 @@ def delete_transcription(file_id) -> None:
     file_id = "" if file_id == "all" else file_id
     directory = os.path.join(TRANSCRIPT_DIR, file_id)
     directory_zip = f"{directory}.zip"
+    existed = os.path.exists(directory) or os.path.exists(directory_zip)
     if os.path.exists(directory):
         shutil.rmtree(directory)
     if os.path.exists(directory_zip):
         os.remove(directory_zip)
     if not os.path.exists(TRANSCRIPT_DIR):
         os.makedirs(TRANSCRIPT_DIR, exist_ok=True)
+    if existed:
+        log_event("transcript_deleted", file_id=file_id_for_log(file_id) if file_id else "all")
 
 
 def open_file_directory(file_id) -> None:

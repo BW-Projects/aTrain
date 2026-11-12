@@ -46,8 +46,8 @@ def prepare_transcription(file: Path) -> tuple[Path, str, str]:
     return file, file_id, timestamp
 
 
-def transcribe(settings: Settings):
-    """Transcribes audio file with specified parameters."""
+def transcribe(settings: Settings) -> str:
+    """Transcribes audio file with specified parameters and returns its file id."""
 
     backend = engine.backend_of(settings.model)
     write_logfile("Directory created", settings.file_id)
@@ -64,6 +64,7 @@ def transcribe(settings: Settings):
     if settings.speaker_detection and transcript:
         transcript = run_speaker_detection(settings, audio_duration, audio_array, transcript)
     write_final_outputs(settings, transcript, audio_duration=audio_duration, backend=backend)
+    return settings.file_id
 
 
 def load_audio(settings: Settings) -> tuple[np.ndarray, int]:

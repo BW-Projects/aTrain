@@ -5,6 +5,8 @@ download lands in the caller's progress dict. The patch used to stay in place
 for the life of the worker process; the next download in that worker, without
 a progress dict, then wrote to a proxy that was already gone. These tests pin
 the module attribute being restored, with `snapshot_download` stubbed out.
+
+The last tests cover `model_is_complete` and `model_url`.
 """
 
 import inspect
@@ -75,3 +77,29 @@ def test_hub_download_functions_accept_the_progress_bar(name):
     # download_model passes `_tqdm_bar` to both; a Hub upgrade that drops it
     # would only fail at download time.
     assert "_tqdm_bar" in inspect.signature(getattr(file_download, name)).parameters
+
+
+@pytest.fixture
+def one_model(tmp_path, monkeypatch):
+    """A models folder and a config with one model of two files."""
+    config = {"m": {"repo_id": "org/m", "revision": "abc", "files": {"a": "x", "sub/b": "y"}}}
+    monkeypatch.setattr(load_resources, "load_model_config_file", lambda: config)
+    monkeypatch.setattr(load_resources, "MODELS_DIR", tmp_path)
+    monkeypatch.setattr(load_resources, "REQUIRED_MODELS", [])
+    return tmp_path / "m"
+
+
+def test_model_is_complete_needs_every_file_of_the_manifest(one_model):
+    assert not load_resources.model_is_complete("m"), "no folder yet"
+
+    one_model.mkdir()
+    (one_model / "a").write_text("")
+    assert not load_resources.model_is_complete("m"), "sub/b is missing"
+
+    (one_model / "sub").mkdir()
+    (one_model / "sub" / "b").write_text("")
+    assert load_resources.model_is_complete("m")
+
+
+def test_model_url_names_repo_and_revision(one_model):
+    assert load_resources.model_url("m") == "https://huggingface.co/org/m/tree/abc"

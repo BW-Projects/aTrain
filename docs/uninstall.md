@@ -127,8 +127,8 @@ rm -rf ~/Documents/aTrain
   decommissioned or a user leaves. From inside the app, the **Delete All**
   button in the Archive tab does the same for the current profile; models and
   settings stay.
-- **The event log** can hold file names in error messages and stays after
-  **Delete All**. See [Operations](operations.md) for its location and
+- **The event log** can hold file paths in the tracebacks of unhandled errors and
+  stays after **Delete All**. See [Operations](operations.md) for its location and
   delete it when a machine is decommissioned or a user leaves.
 - **Models** are large but contain no personal data. They can also be removed
   one by one on the Models page of the app.

@@ -134,6 +134,49 @@ def test_read_archive_merges_file_and_dirname_metadata(archive_root):
 # --- delete_transcription --------------------------------------------------
 
 
+@pytest.fixture
+def events(monkeypatch):
+    """Collect the events that archive.py writes with log_event."""
+    recorded = []
+    monkeypatch.setattr(
+        archive, "log_event", lambda event, level=None, **fields: recorded.append((event, fields))
+    )
+    return recorded
+
+
+def test_delete_transcription_logs_the_timestamp_part_of_the_id(archive_root, events):
+    """The rest of the id is the start of the file name, which stays out of the log."""
+    (archive_root / "2611121004-Maria_M").mkdir(parents=True)
+
+    archive.delete_transcription("2611121004-Maria_M")
+
+    assert events == [("transcript_deleted", {"file_id": "2611121004"})]
+
+
+def test_delete_transcription_logs_other_for_a_folder_it_did_not_name(archive_root, events):
+    (archive_root / "Maria Mueller").mkdir(parents=True)
+
+    archive.delete_transcription("Maria Mueller")
+
+    assert events == [("transcript_deleted", {"file_id": "other"})]
+
+
+def test_delete_transcription_all_logs_all(archive_root, events):
+    (archive_root / "rec3").mkdir(parents=True)
+
+    archive.delete_transcription("all")
+
+    assert events == [("transcript_deleted", {"file_id": "all"})]
+
+
+def test_delete_transcription_logs_nothing_when_nothing_was_there(archive_root, events):
+    archive_root.mkdir(parents=True)
+
+    archive.delete_transcription("never-existed")
+
+    assert events == []
+
+
 def test_delete_transcription_removes_dir(archive_root):
     d = archive_root / "rec3"
     d.mkdir(parents=True)
