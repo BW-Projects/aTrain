@@ -87,6 +87,19 @@ def get_model(model: str, progress: DictProxy | None = None) -> Path:
     return model_path
 
 
+def model_is_complete(model: str) -> bool:
+    """Whether get_model() would use the folder as it is instead of downloading."""
+    models_dir = REQUIRED_MODELS_DIR if model in REQUIRED_MODELS else MODELS_DIR
+    model_path = models_dir / model
+    manifest = load_model_config_file()[model].get("files") or {}
+    return model_path.exists() and not find_missing_files(model_path, manifest)
+
+
+def model_url(model: str) -> str:
+    model_info = load_model_config_file()[model]
+    return f"https://huggingface.co/{model_info['repo_id']}/tree/{model_info['revision']}"
+
+
 def _integrity_message(model: str, model_path: Path, problems: list[str]) -> str:
     """Explain what to do, which differs for models that ship inside the package."""
     if not os.access(model_path, os.W_OK):
