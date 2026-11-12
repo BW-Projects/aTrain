@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import os
 import traceback
 from concurrent.futures.process import BrokenProcessPool
@@ -5,8 +7,15 @@ from multiprocessing import Manager
 
 from aTrain.components.dialogs.download import close_dialog_download, dialog_download
 from aTrain.components.dialogs.error import dialog_error
+from aTrain_core.event_log import log_event
 from aTrain_core.globals import MODELS_DIR, REQUIRED_MODELS_DIR
-from aTrain_core.load_resources import get_model, load_model_config_file, remove_model
+from aTrain_core.load_resources import (
+    get_model,
+    load_model_config_file,
+    model_is_complete,
+    model_url,
+    remove_model,
+)
 from aTrain_core.settings import load_languages
 from huggingface_hub.utils import get_session
 from nicegui import run, ui
@@ -92,27 +101,60 @@ def model_languages(model: str) -> dict:
 
 
 async def download_model(model: str):
+    # True from model_download_started until the end of that download is logged.
+    download_open = False
     with Manager() as manager:
         progress = manager.dict({"current": 0, "total": 999999})
         dialog_download(progress, model)
         try:
+            # get_model() fetches nothing for a model that is already complete.
+            if not model_is_complete(model):
+                log_event("model_download_started", model=model, url=model_url(model))
+                download_open = True
             check_internet()
-            await run.cpu_bound(get_model, model=model, progress=progress)
+            try:
+                model_path = await run.cpu_bound(get_model, model=model, progress=progress)
+            except asyncio.CancelledError:
+                # NiceGUI 4 raises this where NiceGUI 3 returns None, see below.
+                if download_open:
+                    log_event("model_download_stopped", model=model)
+                raise
+            if download_open:
+                download_open = False
+                # NiceGUI 3 returns None when get_model() never ran: after a stop
+                # while no worker ran, or when the server shuts down.
+                if model_path is None:
+                    log_event("model_download_stopped", model=model)
+                else:
+                    log_event("model_download_finished", model=model, checksum="ok")
             close_dialog_download()
             ui.navigate.reload()
 
         except BrokenProcessPool:
+            if download_open:
+                log_event("model_download_stopped", model=model)
             remove_model(model)
             setup_process_pool()
             close_dialog_download()
             ui.navigate.reload()
 
         except SubprocessException as e:
+            if download_open:
+                checksum = (
+                    {"checksum": "failed"} if e.original_type == "ModelIntegrityError" else {}
+                )
+                error = f"{e.original_type}: {e.original_message}"
+                log_event(
+                    "model_download_failed", logging.ERROR, model=model, error=error, **checksum
+                )
             remove_model(model)
             close_dialog_download()
             dialog_error(error=e.original_message, traceback=e.original_traceback)
 
         except Exception as e:
+            if download_open:
+                error = f"{type(e).__name__}: {e}"
+                log_event("model_download_failed", logging.ERROR, model=model, error=error)
             remove_model(model)
             close_dialog_download()
             dialog_error(str(e), traceback.format_exc())
