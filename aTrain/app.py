@@ -6,7 +6,8 @@ from typing import Annotated, cast
 
 from aTrain_core.event_log import log_event, log_unhandled_exception, setup_event_log
 from aTrain_core.globals import ATRAIN_DIR, FLATPAK, REQUIRED_MODELS
-from aTrain_core.load_resources import get_model
+from aTrain_core.integrity import ModelIntegrityError
+from aTrain_core.load_resources import get_model, model_is_complete, model_url
 from typer import Option, Typer
 
 from aTrain.utils.hosts import bind_host, host_check_applies, restrict_to_loopback_hosts
@@ -18,8 +19,25 @@ cli = Typer(help="CLI for aTrain.")
 @cli.command()
 def init():
     """Download all required model for aTrain."""
+    setup_event_log()
     for model in REQUIRED_MODELS:
-        get_model(model=model)
+        if model_is_complete(model):
+            get_model(model=model)  # fetches nothing
+            continue
+        log_event("model_download_started", model=model, url=model_url(model))
+        try:
+            get_model(model=model)
+        except KeyboardInterrupt:
+            log_event("model_download_stopped", model=model)
+            raise
+        except Exception as error:
+            checksum = {"checksum": "failed"} if isinstance(error, ModelIntegrityError) else {}
+            error_text = f"{type(error).__name__}: {error}"
+            log_event(
+                "model_download_failed", logging.ERROR, model=model, error=error_text, **checksum
+            )
+            raise
+        log_event("model_download_finished", model=model, checksum="ok")
 
 
 @cli.command()

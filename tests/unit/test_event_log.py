@@ -114,3 +114,18 @@ def test_a_line_break_in_an_exception_cannot_forge_an_entry(log_file):
     lines = log_file.read_text(encoding="utf-8").splitlines()
     entries = [line for line in lines if not line.startswith(" ")]
     assert entries == lines[:1], lines
+
+
+@pytest.mark.parametrize(
+    ("file_id", "logged"),
+    [
+        ("2611121004-Maria_M", "2611121004"),
+        ("2611121004-sample_-2", "2611121004"),
+        ("Maria Mueller", "other"),
+        ("2024-01-01 interview", "other"),
+        (None, None),
+    ],
+)
+def test_file_id_for_log_keeps_only_the_timestamp(file_id, logged):
+    """A folder that aTrain did not name has no timestamp part and is logged as "other"."""
+    assert event_log.file_id_for_log(file_id) == logged

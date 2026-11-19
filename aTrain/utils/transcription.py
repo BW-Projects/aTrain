@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import traceback
 from concurrent.futures.process import BrokenProcessPool
 from dataclasses import dataclass
@@ -10,6 +12,8 @@ from aTrain.components.dialogs.error import dialog_error
 from aTrain.components.dialogs.finished import dialog_finished
 from aTrain.components.dialogs.process import close_dialog_process, dialog_process
 from aTrain.utils.archive import delete_transcription
+from aTrain_core.event_log import file_id_for_log, log_event
+from aTrain_core.load_resources import model_is_complete, model_url
 from aTrain_core.settings import ComputeType, Device, Settings, check_inputs_transcribe
 from nicegui import app, events, run, ui
 from nicegui.run import SubprocessException
@@ -54,6 +58,31 @@ class UploadPayload:
         await self.upload.save(target)
         return target
 
+    def extension(self) -> str:
+        return Path(self.name).suffix.lower()
+
+    def size(self) -> int | None:
+        try:
+            if self.path is not None:
+                return self.path.stat().st_size
+            return self.upload.size() if self.upload is not None else None
+        except OSError:
+            # The file can be gone by now. Log the event without a size instead of failing.
+            return None
+
+
+def _without_recording(text: str, file_id: str | None, *names: str | None) -> str:
+    """Take the recording out of an error message before it is logged.
+
+    Its path and file name become <file>. The file id keeps only its timestamp
+    part, because the rest is the start of the file name.
+    """
+    for name in sorted({name for name in names if name}, key=len, reverse=True):
+        text = text.replace(name, "<file>")
+    if file_id:
+        text = text.replace(file_id, file_id_for_log(file_id) or "")
+    return text
+
 
 async def start_transcription(file: events.UploadEventArguments):
     """NiceGUI `on_upload` handler (browser upload path)."""
@@ -70,6 +99,12 @@ async def run_pipeline(payload: UploadPayload):
     from aTrain_core.transcribe import prepare_transcription, transcribe
 
     file_id: str | None = None
+    # Every name of the recording that an error message can contain: its file name
+    # and its paths.
+    recording = [payload.name, str(payload.path) if payload.path else None]
+    missing: list[str] = []
+    checksum_failed: list[str] = []
+    outcome_logged = False
     with Manager() as manager, TemporaryDirectory() as tmp_dir:
         progress = manager.dict({"task": "Prepare", "current": 0, "total": 999999})
         dialog_process(progress)
@@ -83,9 +118,30 @@ async def run_pipeline(payload: UploadPayload):
             # Validate first: it needs nothing but the name and the settings, and
             # rejecting a wrong model or language should not cost a directory and
             # a full copy of the upload beforehand.
-            check_inputs_transcribe(payload.name, state.get("model"), state.get("language"), device)
+            try:
+                check_inputs_transcribe(
+                    payload.name, state.get("model"), state.get("language"), device
+                )
+            except ValueError as e:
+                outcome_logged = True
+                log_event(
+                    "file_rejected",
+                    logging.WARNING,
+                    extension=payload.extension(),
+                    size=payload.size(),
+                    reason=_without_recording(str(e), None, *recording),
+                )
+                raise
             safe_file, file_id, timestamp = prepare_transcription(Path(payload.name))
+            recording.append(safe_file.name)
+            log_event(
+                "file_accepted",
+                file_id=file_id_for_log(file_id),
+                extension=payload.extension(),
+                size=payload.size(),
+            )
             source = await payload.materialise(Path(tmp_dir), safe_file.name)
+            recording.append(str(source))
             settings = Settings(
                 file=source,
                 file_id=file_id,
@@ -102,11 +158,40 @@ async def run_pipeline(payload: UploadPayload):
                 cpu_threads=int(state.get("cpu_threads", 0)) or 0,
                 progress=progress,
             )
-            await run.cpu_bound(transcribe, settings=settings)
+            # The worker's get_model() downloads a missing model without telling the
+            # server, so the server logs the download here.
+            needed = [state.get("model")]
+            if state.get("speaker_detection"):
+                needed.append("speaker-detection")
+            missing = [model for model in needed if not model_is_complete(model)]
+            for model in missing:
+                log_event("model_download_by_transcription", model=model, url=model_url(model))
+            # Logged when the file goes to the worker. If the worker never runs,
+            # transcription_stopped follows.
+            log_event(
+                "transcription_started",
+                file_id=file_id_for_log(file_id),
+                model=state.get("model"),
+                device=device.value,
+            )
+            try:
+                completed = await run.cpu_bound(transcribe, settings=settings)
+            except asyncio.CancelledError:
+                # NiceGUI 4 raises this where NiceGUI 3 returns None, see below.
+                log_event("transcription_stopped", file_id=file_id_for_log(file_id))
+                raise
+            outcome_logged = True
+            if completed is None:
+                # NiceGUI 3 returns None when transcribe() never ran: after a stop
+                # while no worker ran, or when the server shuts down.
+                log_event("transcription_stopped", file_id=file_id_for_log(file_id))
+            else:
+                log_event("transcription_finished", file_id=file_id_for_log(file_id))
             close_dialog_process()
             dialog_finished(file_id)
 
         except BrokenProcessPool:
+            log_event("transcription_stopped", file_id=file_id_for_log(file_id))
             if file_id is not None:
                 delete_transcription(file_id)
             setup_process_pool()
@@ -114,9 +199,43 @@ async def run_pipeline(payload: UploadPayload):
             ui.navigate.reload()
 
         except SubprocessException as e:
+            if e.original_type == "ModelIntegrityError":
+                # The message of a ModelIntegrityError names its model in quotes.
+                checksum_failed = [model for model in missing if f"'{model}'" in e.original_message]
+            error = f"{e.original_type}: {e.original_message}"
+            log_event(
+                "transcription_failed",
+                logging.ERROR,
+                file_id=file_id_for_log(file_id),
+                error=_without_recording(error, file_id, *recording),
+            )
             close_dialog_process()
             dialog_error(error=e.original_message, traceback=e.original_traceback)
 
         except Exception as e:
+            # A rejected file and a run that ended are in the log already. What
+            # failed then is the dialog, not the transcription.
+            if not outcome_logged:
+                error = f"{type(e).__name__}: {e}"
+                log_event(
+                    "transcription_failed",
+                    logging.ERROR,
+                    file_id=file_id_for_log(file_id),
+                    error=_without_recording(error, file_id, *recording),
+                )
             close_dialog_process()
             dialog_error(error=str(e), traceback=traceback.format_exc())
+
+        finally:
+            # One end event for every model announced above. The server cannot see
+            # whether the worker started the download, only what is on disk now.
+            # get_model() verified a model that is complete.
+            for model in missing:
+                if model_is_complete(model):
+                    log_event("model_download_finished", model=model, checksum="ok")
+                elif model in checksum_failed:
+                    log_event(
+                        "model_download_incomplete", logging.ERROR, model=model, checksum="failed"
+                    )
+                else:
+                    log_event("model_download_incomplete", model=model)
