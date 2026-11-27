@@ -27,9 +27,9 @@ dependencies = [
   # CTranslate2 extra (a incompatible fork of Ctranslate2 used by faster-whisper):
   "crisperwhisper[transformers]==2.1.0",
   # 5.17 is the first release with Parakeet TDT, Qwen3-ASR and Canary support.
-  "transformers==5.23.0",
+  "transformers==5.24.0",
   "pandas==3.1.1",
-  "pyannote.audio==4.1.0",
+  "pyannote.audio==4.1.1",
   "numpy==2.4.6",
   # Transformers 5.17 requires Hub >=1.5,<2; download and inference paths
   # are covered by the core integration tests before changing this pin.
@@ -40,8 +40,8 @@ dependencies = [
   # torchaudio must match torch (ABI-coupled); keep in lockstep with the pins above.
   "torchaudio==2.9.1+cu128; sys_platform == 'win32'",
   "torchaudio==2.9.1; sys_platform != 'win32'",
-  "typer==0.29.1",
-  "platformdirs==4.14.5",
+  "typer==0.29.2",
+  "platformdirs==4.14.8",
   "jiwer==4.0.0",
 ]
 
@@ -100,7 +100,7 @@ dev = [
 ]
 # Tools for .github/scripts/prepare-flatpak.py (not part of the app).
 flatpak = [
-  "packaging==26.3",
+  "packaging==26.4",
   "ruamel.yaml==0.19.1",
 ]
 
